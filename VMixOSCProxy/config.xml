@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
     <tally>Happyrobot33</tally>
+    <updaterate>500</updaterate>
+    <vmix>
+        <ip>localhost</ip>
+        <port>8088</port>
+        <username>admin</username>
+        <password>admin</password>
+    </vmix>
     <osc>
-        <previewparameter>testparamname</previewparameter>
-        <programparameter>testparamname</programparameter>
+        <ip>127.0.0.1</ip>
+        <port>9000</port>
+        <previewparameter>preview</previewparameter>
+        <programparameter>program</programparameter>
+        <standbyparameter>standby</standbyparameter>
     </osc>
 </config>
