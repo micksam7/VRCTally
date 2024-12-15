@@ -11,8 +11,8 @@
     <osc>
         <ip>127.0.0.1</ip>
         <port>9000</port>
-        <previewparameter>preview</previewparameter>
-        <programparameter>program</programparameter>
+        <previewparameter>VRCLLime_Preview_Light</previewparameter>
+        <programparameter>VRCLLime_Program_Light</programparameter>
         <standbyparameter>standby</standbyparameter>
     </osc>
 </config>
