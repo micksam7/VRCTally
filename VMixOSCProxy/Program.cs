@@ -79,10 +79,10 @@ public static class Program
             Console.WriteLine($"VMix version: {vmix.Version}");
 
             //try to find the input with the name the user entered, otherwise print an error and skip everything else
-            Input input = vmix.Inputs.Input.FirstOrDefault(i => i.Title == config.Tally);
+            Input input = vmix.Inputs.Input.FirstOrDefault(i => i.Title == config.Vmix.Tally);
             if (input == null)
             {
-                Console.WriteLine($"Input with name '{config.Tally}' not found");
+                Console.WriteLine($"Input with name '{config.Vmix.Tally}' not found");
                 return;
             }
             Console.WriteLine($"Your Tally is: {input.Title}");

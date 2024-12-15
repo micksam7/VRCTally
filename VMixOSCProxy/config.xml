@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-    <tally>Happyrobot33</tally>
     <updaterate>500</updaterate>
     <vmix>
         <ip>localhost</ip>
         <port>8088</port>
         <username>admin</username>
         <password>admin</password>
+        <tally>Happyrobot33</tally>
     </vmix>
     <osc>
         <ip>127.0.0.1</ip>

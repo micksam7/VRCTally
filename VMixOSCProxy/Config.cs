@@ -16,6 +16,9 @@ namespace ConfigXML
 
         [XmlElement(ElementName = "password")]
         public string Password { get; set; }
+
+        [XmlElement(ElementName = "tally")]
+        public string Tally { get; set; }
     }
 
     [XmlRoot(ElementName = "osc")]
@@ -40,14 +43,12 @@ namespace ConfigXML
     [XmlRoot(ElementName = "config")]
     public class Config
     {
-        [XmlElement(ElementName = "tally")]
-        public string Tally { get; set; }
-
         [XmlElement(ElementName = "vmix")]
         public Vmix Vmix { get; set; }
 
         [XmlElement(ElementName = "osc")]
         public Osc Osc { get; set; }
+
         [XmlElement(ElementName = "updaterate")]
         public int UpdateRate { get; set; }
     }
