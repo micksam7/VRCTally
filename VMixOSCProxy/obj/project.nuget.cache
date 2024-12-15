@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "0Nev6uilX6hsaae05KQ2yRGLST3Oylwl7GmUNSJ+1upCnJ7upsEcgOVM4lK2Ord+Zf3scksvUfepYNi+ccbAkA==",
+  "dgSpecHash": "Bb+igv5AUo7H4d/UYqMpUmGZhvUhCxKKUOnYe+AYeVpNvREfAD6o9jnC6GiJD5q3licsxwiBHG7tj/omHQBqhg==",
   "success": true,
   "projectFilePath": "E:\\Storage\\Personal\\Coding\\vmix-tally-light-osc-proxy\\VMixOSCProxy\\VMixOSCProxy.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Matthew\\.nuget\\packages\\coreosc\\1.0.0\\coreosc.1.0.0.nupkg.sha512"
+  ],
   "logs": []
 }

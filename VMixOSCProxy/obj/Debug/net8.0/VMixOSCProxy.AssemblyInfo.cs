@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VMixOSCProxy")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4bf21adcc6766ffb33d692861b740b25f966aa5e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8e7bd072e4ff4c823dded431fd91d925c6b0eef9")]
 [assembly: System.Reflection.AssemblyProductAttribute("VMixOSCProxy")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VMixOSCProxy")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <tally>Happyrobot33</tally>
+    <osc>
+        <previewparameter>testparamname</previewparameter>
+        <programparameter>testparamname</programparameter>
+    </osc>
+</config>

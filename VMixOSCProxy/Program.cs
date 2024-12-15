@@ -1,80 +1,91 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-//XML
-using System.Xml;
+using System.Timers;
+using System.Xml.Serialization;
 
-Console.WriteLine("Hello, World!");
-
-//localhost on port 8099
-var ipEndPoint = new IPEndPoint(IPAddress.Loopback, 8099);
-
-using TcpClient client = new();
-await client.ConnectAsync(ipEndPoint);
-await using NetworkStream stream = client.GetStream();
-
-//read initial version ok packet
-string versionOk = ReadFromStream(stream);
-
-//send initial tally subscription message
-//await SendPacket(stream, "SUBSCRIBE TALLY");
-
-//get the info of all the inputs
-string rawXML = await SendPacket(stream, "XML");
-Console.WriteLine(rawXML);
-//parse the XML
-//XmlDocument doc = new();
-//doc.LoadXml(rawXML);
-//print it
-//Console.WriteLine(doc.OuterXml);
-
-/* while (true)
+public static class Program
 {
-    string _Message = ReadFromStream(stream);
+    private static HttpClient client = new();
+    private static Config config;
 
-    Console.Write(_Message);
-} */
-
-static async Task<string> SendPacket(NetworkStream stream, string message)
-{
-    var messageBytes = Encoding.UTF8.GetBytes(message + "\r\n");
-    await stream.WriteAsync(messageBytes);
-    return ReadFromStream(stream);
-}
-
-static string ReadFromStream(NetworkStream stream)
-{
-    string _Message = "";
-    while (true)
+    public static async Task Main()
     {
-        // Create Byte to Receive Data:
-        byte[] _Buffer = new byte[1024];
-        // Create integer to hold how large the Data Received is:
-        int _DataReceived = stream.Read(_Buffer, 0, _Buffer.Length);
-        // Convert Buffer to a String:
-        _Message += Encoding.ASCII.GetString(_Buffer);
+        //load in the config file
+        string xml = await File.ReadAllTextAsync("config.xml");
 
-        //watch for \r\n
-        if (_Message.EndsWith("\r\n"))
+        XmlSerializer serializer = new XmlSerializer(typeof(Config));
+        using (StringReader reader = new StringReader(xml))
         {
-            //if its a XML message, we need to wait for one more \r\n
-            if (_Message.StartsWith("XML"))
+            config = (Config)serializer.Deserialize(reader);
+        }
+
+        //setup HTTP[s] request
+        client = new() { BaseAddress = new Uri("http://localhost:8088/API") };
+
+        // Create a timer
+        System.Timers.Timer myTimer = new System.Timers.Timer();
+        myTimer.Elapsed += new ElapsedEventHandler(myEventAsync);
+        myTimer.Interval = 1000;
+        myTimer.Start();
+
+        //wait infinitely
+        await Task.Delay(-1);
+    }
+
+    //create a enum to represent the state of the VMix
+    public enum VMixState
+    {
+        Live,
+        Preview,
+        Standby
+    }
+
+    public static async void myEventAsync(object source, ElapsedEventArgs e)
+    {
+        //request VMix XML
+        string xml = await client.GetStringAsync("");
+
+        //replace all "False" with "false" and "True" with "true"
+        xml = xml.Replace("False", "false").Replace("True", "true");
+
+        XmlSerializer serializer = new XmlSerializer(typeof(Vmix));
+        using (StringReader reader = new StringReader(xml))
+        {
+            Vmix vmix = (Vmix)serializer.Deserialize(reader);
+
+            //clear console
+            Console.Clear();
+
+            //print VMix version
+            Console.WriteLine($"VMix version: {vmix.Version}");
+
+            //try to find the input with the name the user entered, otherwise print an error and skip everything else
+            Input input = vmix.Inputs.Input.FirstOrDefault(i => i.Title == config.Tally);
+            if (input == null)
             {
-                continue;
+                Console.WriteLine($"Input with name '{config.Tally}' not found");
+                return;
+            }
+            Console.WriteLine($"Your Tally is: {input.Title}");
+
+            //print current in preview and in active
+            Console.WriteLine($"Currently {VMixState.Preview} in VMix: {vmix.PreviewInput.Title}");
+            Console.WriteLine($"Currently {VMixState.Live} in VMix: {vmix.ActiveInput.Title}");
+
+            //determine if we are live, preview or standby
+            VMixState state;
+            if (vmix.Preview == input.Number)
+            {
+                state = VMixState.Preview;
+            }
+            else if (vmix.Active == input.Number)
+            {
+                state = VMixState.Live;
             }
             else
             {
-                break;
+                state = VMixState.Standby;
             }
+            Console.WriteLine($"You are currently: {state}");
         }
     }
-
-    return _Message;
 }
-
-/* var message = $"📅 {DateTime.Now} 🕛";
-var dateTimeBytes = Encoding.UTF8.GetBytes(message);
-//await stream.WriteAsync(dateTimeBytes);
-
-//Console.WriteLine($"Sent message: \"{message}\""); */

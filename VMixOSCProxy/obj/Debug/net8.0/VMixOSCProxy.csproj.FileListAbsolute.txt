@@ -12,3 +12,4 @@ E:\Storage\Personal\Coding\vmix-tally-light-osc-proxy\VMixOSCProxy\obj\Debug\net
 E:\Storage\Personal\Coding\vmix-tally-light-osc-proxy\VMixOSCProxy\obj\Debug\net8.0\VMixOSCProxy.pdb
 E:\Storage\Personal\Coding\vmix-tally-light-osc-proxy\VMixOSCProxy\obj\Debug\net8.0\VMixOSCProxy.genruntimeconfig.cache
 E:\Storage\Personal\Coding\vmix-tally-light-osc-proxy\VMixOSCProxy\obj\Debug\net8.0\ref\VMixOSCProxy.dll
+E:\Storage\Personal\Coding\vmix-tally-light-osc-proxy\VMixOSCProxy\bin\Debug\net8.0\config.xml
