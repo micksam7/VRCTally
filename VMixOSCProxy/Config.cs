@@ -32,19 +32,19 @@ namespace ConfigXML
     public class Parameters
     {
         [XmlElement(ElementName = "preview")]
-        public required string Preview { get; set; }
+        public required string Previewparameter { get; set; }
 
         [XmlElement(ElementName = "program")]
-        public required string Program { get; set; }
+        public required string Programparameter { get; set; }
 
         [XmlElement(ElementName = "standby")]
-        public required string Standby { get; set; }
+        public required string Standbyparameter { get; set; }
 
         [XmlElement(ElementName = "heartbeat")]
-        public required string Heartbeat { get; set; }
+        public required string Heartbeatparameter { get; set; }
 
         [XmlElement(ElementName = "error")]
-        public required string Error { get; set; }
+        public required string Errorparameter { get; set; }
     }
 
     [XmlRoot(ElementName = "config")]

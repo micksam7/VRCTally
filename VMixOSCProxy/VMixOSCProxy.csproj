@@ -12,7 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CoreOSC" Version="1.0.0" />
-    <PackageReference Include="Terminal.Gui" Version="1.17.1" />
     <PackageReference Include="VRChat.OSCQuery" Version="0.0.7" />
   </ItemGroup>
 </Project>
