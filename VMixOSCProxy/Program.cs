@@ -45,8 +45,11 @@ public static class Program
 
         //startup oscquery service
         oscQuery = new OSCQueryServiceBuilder()
+            // First, modify class' properties.
+            .WithTcpPort(Extensions.GetAvailableTcpPort())
+            .WithServiceName("VRCTally")
+            // Then activate server with this function
             .WithDefaults()
-            .WithServiceName("VMix Tally Light Proxy")
             .Build();
 
         Console.WriteLine(
@@ -91,9 +94,11 @@ public static class Program
             var tree = await Extensions.GetOSCTree(service.address, service.port);
             if (tree.GetNodeWithPath("/chatbox/input") != null) //this is just a endpoint we know *has* to exist in VRChat
             {
+                //get host info
+                VRC.OSCQuery.HostInfo Hostinfo = await Extensions.GetHostInfo(service.address, service.port);
                 //setup OSC client
-                string IP = service.address.ToString();
-                int port = service.port;
+                string IP = Hostinfo.oscIP;
+                int port = Hostinfo.oscPort;
                 oscClient = new(IP, port);
             }
         }

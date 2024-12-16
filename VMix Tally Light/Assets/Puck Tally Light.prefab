@@ -495,7 +495,13 @@ MonoBehaviour:
             objRef: {fileID: 9100000, guid: 77f52d34dd2368d4993f5505ffdce49a, type: 2}
           type: 5
         menus: []
-        prms: []
+        prms:
+        - parameters:
+            version: 1
+            fileID: 0
+            guid: 
+            id: 8e2074cd0e9f35743822cc37bd295002|Assets/VRCTally Params.asset
+            objRef: {fileID: 11400000, guid: 8e2074cd0e9f35743822cc37bd295002, type: 2}
         smoothedPrms: []
         globalParams:
         - VRCTally_Heartbeat
