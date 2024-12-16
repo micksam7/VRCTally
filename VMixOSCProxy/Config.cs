@@ -24,12 +24,6 @@ namespace ConfigXML
     [XmlRoot(ElementName = "osc")]
     public class Osc
     {
-        [XmlElement(ElementName = "ip")]
-        public required string Ip { get; set; }
-
-        [XmlElement(ElementName = "port")]
-        public int Port { get; set; }
-
         [XmlElement(ElementName = "parameters")]
         public required Parameters Parameters { get; set; }
     }

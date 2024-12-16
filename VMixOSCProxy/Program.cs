@@ -6,12 +6,14 @@ using ConfigXML;
 using VMixAPI;
 using CoreOSC;
 using CoreOSC.IO;
+using VRC.OSCQuery;
 using System.Net.Sockets;
 
 public static class Program
 {
     private static HttpClient vmixclient = new();
     private static UdpClient oscClient = new();
+    private static OSCQueryService oscQuery;
     private static Config config;
     private static bool Heartbeat = false;
     private static bool Error = false;
@@ -41,8 +43,17 @@ public static class Program
             )
         );
 
-        //setup OSC client
-        oscClient = new(config.Osc.Ip, config.Osc.Port);
+        //startup oscquery service
+        oscQuery = new OSCQueryServiceBuilder()
+            .WithDefaults()
+            .WithServiceName("VMix Tally Light Proxy")
+            .Build();
+
+        Console.WriteLine(
+            $"OSCQuery Service started at TCP {oscQuery.TcpPort} and UDP {oscQuery.TcpPort}"
+        );
+
+        await FindVRChatOSC();
 
         // Create a timer
         System.Timers.Timer mainTimer = new System.Timers.Timer();
@@ -60,7 +71,34 @@ public static class Program
         await Task.Delay(-1);
     }
 
+    private static async Task FindVRChatOSC()
+    {
+        List<OSCQueryServiceProfile> services =
+        [
+            //add all to a list
+            .. oscQuery.GetOSCQueryServices(),
+        ];
+
+        //we now need to find the specific connection for VRChat
+        foreach (var service in services)
+        {
+            Console.WriteLine(
+                $"Found OSCQuery Service: {service.name} at {service.address}:{service.port}"
+            );
+            //check if it has the endpoint we need
+            var tree = await Extensions.GetOSCTree(service.address, service.port);
+            if (tree.GetNodeWithPath("/chatbox/input") != null) //this is just a endpoint we know *has* to exist in VRChat
+            {
+                //setup OSC client
+                string IP = service.address.ToString();
+                int port = service.port;
+                oscClient = new(IP, port);
+            }
+        }
+    }
+
     //create a enum to represent the state of the VMix
+
     public enum VMixState
     {
         Live,
@@ -160,7 +198,6 @@ public static class Program
                     Error = false;
                 }
             }
-
         }
         catch (Exception ex)
         {
@@ -187,11 +224,12 @@ public static class Program
                 break;
             case SocketException:
                 Console.WriteLine(
-                    "Could not communicate to VRChat over OSC, is the port/IP correct or is VRChat running?"
+                    "Could not communicate to VRChat over OSC, is the port/IP correct or is VRChat running? Attempting to reconnect..."
                 );
                 Console.WriteLine(
-                    $"VRChat OSC Configured Endpoint: {config.Osc.Ip}:{config.Osc.Port}"
+                    $"VRChat OSC Configured Endpoint: {oscClient.Client.RemoteEndPoint}"
                 );
+                await FindVRChatOSC();
                 break;
             default:
                 //return failed
@@ -207,6 +245,11 @@ public static class Program
         await oscClient.SendMessageAsync(message);
     }
 
+    /// <summary>
+    /// Convert a boolean to a OSC value
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
     public static object BoolToValue(bool value)
     {
         return value ? OscTrue.True : OscFalse.False;
