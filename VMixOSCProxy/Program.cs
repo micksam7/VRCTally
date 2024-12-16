@@ -89,7 +89,7 @@ public static class Program
             );
             //check if it has the endpoint we need
             var tree = await Extensions.GetOSCTree(service.address, service.port);
-            if (tree.GetNodeWithPath(avatarParamPrefix + "Velocity") != null) //this is just a endpoint we know *has* to exist in VRChat
+            if (tree.GetNodeWithPath("/chatbox/input") != null) //this is just a endpoint we know *has* to exist in VRChat
             {
                 //setup OSC client
                 string IP = service.address.ToString();
