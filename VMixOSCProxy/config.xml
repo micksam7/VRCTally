@@ -16,6 +16,7 @@
             <program>VRCLLime_Program_Active</program>
             <standby>VRCLLime_Standby_Active</standby>
             <heartbeat>VRCLLime_Heartbeat</heartbeat>
+            <error>VRCLLime_Error</error>
         </parameters>
     </osc>
 </config>
