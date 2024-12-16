@@ -30,14 +30,24 @@ namespace ConfigXML
         [XmlElement(ElementName = "port")]
         public int Port { get; set; }
 
-        [XmlElement(ElementName = "previewparameter")]
+        [XmlElement(ElementName = "parameters")]
+        public Parameters Parameters { get; set; }
+    }
+
+    [XmlRoot(ElementName = "parameters")]
+    public class Parameters
+    {
+        [XmlElement(ElementName = "preview")]
         public string Previewparameter { get; set; }
 
-        [XmlElement(ElementName = "programparameter")]
+        [XmlElement(ElementName = "program")]
         public string Programparameter { get; set; }
 
-        [XmlElement(ElementName = "standbyparameter")]
+        [XmlElement(ElementName = "standby")]
         public string Standbyparameter { get; set; }
+
+        [XmlElement(ElementName = "heartbeat")]
+        public string Heartbeatparameter { get; set; }
     }
 
     [XmlRoot(ElementName = "config")]

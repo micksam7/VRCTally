@@ -13,6 +13,7 @@ public static class Program
     private static HttpClient vmixclient = new();
     private static UdpClient oscClient = new();
     private static Config config;
+    private static bool Heartbeat = false;
 
     public static async Task Main()
     {
@@ -109,14 +110,18 @@ public static class Program
 
             //setup endpoints
             const string avatarParamPrefix = "/avatar/parameters/";
-            Address preview = new(avatarParamPrefix + config.Osc.Previewparameter);
-            Address program = new(avatarParamPrefix + config.Osc.Programparameter);
-            Address standby = new(avatarParamPrefix + config.Osc.Standbyparameter);
+            Address preview = new(avatarParamPrefix + config.Osc.Parameters.Previewparameter);
+            Address program = new(avatarParamPrefix + config.Osc.Parameters.Programparameter);
+            Address standby = new(avatarParamPrefix + config.Osc.Parameters.Standbyparameter);
+            Address heartbeat = new(avatarParamPrefix + config.Osc.Parameters.Heartbeatparameter);
 
             //send OSC updates
             await SendOSC(preview, BoolToValue(state == VMixState.Preview));
             await SendOSC(program, BoolToValue(state == VMixState.Live));
             await SendOSC(standby, BoolToValue(state == VMixState.Standby));
+            //flip heartbeat
+            Heartbeat = !Heartbeat;
+            await SendOSC(heartbeat, BoolToValue(Heartbeat));
         }
     }
 
