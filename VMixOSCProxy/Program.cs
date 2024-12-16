@@ -73,6 +73,8 @@ public static class Program
 
     private static async Task FindVRChatOSC()
     {
+        //oscClient = new("127.0.0.1", 9000);
+
         List<OSCQueryServiceProfile> services =
         [
             //add all to a list
@@ -94,12 +96,6 @@ public static class Program
                 int port = service.port;
                 oscClient = new(IP, port);
             }
-        }
-
-        //if its still null, attempt the default VRChat OSC port
-        if (oscClient.Client == null)
-        {
-            oscClient = new("127.0.0.1", 9000);
         }
     }
 
