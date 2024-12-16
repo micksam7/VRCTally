@@ -53,7 +53,7 @@ public static class Program
         //setup a seperate timer that always has the same update rate for the heartbeat
         System.Timers.Timer heartbeatTimer = new System.Timers.Timer();
         heartbeatTimer.Elapsed += new ElapsedEventHandler(SendProgramStatus);
-        heartbeatTimer.Interval = 100;
+        heartbeatTimer.Interval = 500;
         heartbeatTimer.Start();
 
         //wait infinitely
