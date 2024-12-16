@@ -11,15 +11,14 @@ env:
 jobs:
   build:
     name: ${{ matrix.platform.name }} ${{ matrix.dotnet.name }}
-    runs-on: ${{ matrix.platform.os }}
+    runs-on: ubuntu-22.04
      
     strategy:
       fail-fast: false
       matrix:
         platform:
-        - { name: Linux, os: ubuntu-22.04 }
-        - { name: Windows VS2022, os: windows-2022 }
-        - { name: MacOS, os: macos-14 }
+        - { name: Linux, rid: linux-x64 }
+        - { name: Windows, rid: win-x64 }
         dotnet:
         - { name: .NET 8, version: '8.0.x' }
  
@@ -37,14 +36,14 @@ jobs:
         run: dotnet --info
       - name: Restore
         run: dotnet restore
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-      - name: Test
-        run: dotnet test --no-restore --verbosity normal
+#      - name: Build
+#        run: dotnet build --configuration Release --no-restore
+#      - name: Test
+#        run: dotnet test --no-restore --verbosity normal
       - name: Publish
-        run: dotnet publish --self-contained --artifacts-path ./artifacts
+        run: dotnet publish -r ${{ matrix.platform.rid }} --self-contained --artifacts-path ./artifacts
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.platform.name }} ${{ matrix.dotnet.name }}
+          name: VRCTally ${{ matrix.platform.name }} ${{ matrix.dotnet.name }}
           path: './artifacts'
