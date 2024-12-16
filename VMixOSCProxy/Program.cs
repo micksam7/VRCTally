@@ -110,11 +110,11 @@ public static class Program
     {
         try
         {
-            Address heartbeat = new(avatarParamPrefix + config.Osc.Parameters.Heartbeatparameter);
+            Address heartbeat = new(avatarParamPrefix + config.Osc.Parameters.Heartbeat);
             Heartbeat = !Heartbeat;
             await SendOSC(heartbeat, BoolToValue(Heartbeat));
 
-            Address error = new(avatarParamPrefix + config.Osc.Parameters.Errorparameter);
+            Address error = new(avatarParamPrefix + config.Osc.Parameters.Error);
             await SendOSC(error, BoolToValue(Error));
         }
         catch (Exception ex)
@@ -184,11 +184,11 @@ public static class Program
 
                     //setup endpoints
                     Address preview =
-                        new(avatarParamPrefix + config.Osc.Parameters.Previewparameter);
+                        new(avatarParamPrefix + config.Osc.Parameters.Preview);
                     Address program =
-                        new(avatarParamPrefix + config.Osc.Parameters.Programparameter);
+                        new(avatarParamPrefix + config.Osc.Parameters.Program);
                     Address standby =
-                        new(avatarParamPrefix + config.Osc.Parameters.Standbyparameter);
+                        new(avatarParamPrefix + config.Osc.Parameters.Standby);
 
                     //send OSC updates
                     await SendOSC(preview, BoolToValue(state == VMixState.Preview));
