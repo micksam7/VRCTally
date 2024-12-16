@@ -280,6 +280,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 483950575}
+    - targetCorrespondingSourceObject: {fileID: 747969231759637169, guid: f81e8172c337a714894d6fdbd0900d8d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 586795985}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f81e8172c337a714894d6fdbd0900d8d,
         type: 3}
@@ -478,7 +482,7 @@ MonoBehaviour:
   - v_ih
   - v_oh
   - v_ou
-  unityVersion: 2019.4.31f1
+  unityVersion: 2022.3.22f1
   portraitCameraPositionOffset: {x: 0, y: 0, z: 0}
   portraitCameraRotationOffset: {x: 0, y: 1, z: 0, w: -0.00000004371139}
   networkIDs: []
@@ -741,7 +745,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   launchedFromSDKPipeline: 0
   completedSDKPipeline: 0
-  blueprintId: 
+  blueprintId: avtr_d1f2e766-28ff-4c00-bc00-3eb63e64a012
   contentType: 0
   assetBundleUnityVersion: 
   fallbackStatus: 1
@@ -6042,6 +6046,85 @@ MonoBehaviour:
   showGizmos: 1
   boneOpacity: 0.5
   limitOpacity: 0.5
+--- !u!1001 &586795984
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 43931672}
+    m_Modifications:
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.292
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.70710677
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071069
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -1.4921396e-13
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 8.146548e-13
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136222475522164289, guid: e3116760477c5324b9b427e4e29857ae,
+        type: 3}
+      propertyPath: m_Name
+      value: Puck Tally Light (1)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e3116760477c5324b9b427e4e29857ae, type: 3}
+--- !u!4 &586795985 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1652455653534604539, guid: e3116760477c5324b9b427e4e29857ae,
+    type: 3}
+  m_PrefabInstance: {fileID: 586795984}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &684618261
 GameObject:
   m_ObjectHideFlags: 0
