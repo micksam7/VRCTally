@@ -19,7 +19,7 @@ jobs:
         platform:
         - { name: Linux, os: ubuntu-22.04 }
         - { name: Windows VS2022, os: windows-2022 }
-        - { name: MacOS, os: macos-12 }
+        - { name: MacOS, os: macos-14 }
         dotnet:
         - { name: .NET 8, version: '8.0.x' }
  
@@ -42,4 +42,4 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
       - name: Publish
-        run: dotnet publish -r --self-contained
+        run: dotnet publish --self-contained
