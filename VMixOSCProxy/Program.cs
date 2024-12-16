@@ -7,9 +7,14 @@ using VMixAPI;
 using CoreOSC;
 using CoreOSC.IO;
 using VRC.OSCQuery;
+using Terminal.Gui;
 using System.Net.Sockets;
 
-public static class Program
+ProgramWindow.Startup().Wait();
+Application.IsMouseDisabled = true;
+Application.Run<ProgramWindow>();
+
+public class ProgramWindow : Window
 {
     private static HttpClient vmixclient = new();
     private static UdpClient oscClient = new();
@@ -19,7 +24,86 @@ public static class Program
     private static bool Error = false;
     const string avatarParamPrefix = "/avatar/parameters/";
 
-    public static async Task Main()
+    private static Label OSCQueryLabel;
+    private static Label OSCLabel;
+    private static Label VMixLabel;
+    private static Label VMixEndpointLabel;
+    private static Label OSCParametersList;
+    private static Label CurrentTallyStateLabel;
+    private static Label UpdateRateLabel;
+
+    public ProgramWindow()
+    {
+        Title = "VMix OSC Proxy";
+
+        CurrentTallyStateLabel = new Label{
+            Text = "Current Tally State",
+            X = 0,
+            Y = 0
+        };
+        Add(CurrentTallyStateLabel);
+
+        UpdateRateLabel = new Label{
+            Text = "Update Rate",
+            X = Pos.Left(CurrentTallyStateLabel),
+            Y = Pos.Bottom(CurrentTallyStateLabel)
+        };
+        Add(UpdateRateLabel);
+
+        //we want to make a set of sub windows on the right side
+        var OSCWindow = new Window("OSC")
+        {
+            X = 0,
+            Y = Pos.Bottom(UpdateRateLabel),
+            Width = Dim.Percent(50),
+            Height = Dim.Fill()
+        };
+        Add(OSCWindow);
+
+        OSCQueryLabel = new Label("OSCQuery");
+        OSCLabel = new Label{Text = "OSC", X = Pos.Left(OSCQueryLabel), Y = Pos.Bottom(OSCQueryLabel)};
+        var OSCParametersSubview = new Window("Parameters")
+        {
+            X = Pos.Left(OSCLabel),
+            Y = Pos.Bottom(OSCLabel),
+            Width = Dim.Fill(),
+            Height = Dim.Fill()
+        };
+        OSCParametersList = new Label{Text = "Parameters"};
+        OSCParametersSubview.Add(OSCParametersList);
+        OSCWindow.Add(OSCQueryLabel, OSCLabel, OSCParametersSubview);
+
+        var VMixWindow = new Window("VMix")
+        {
+            X = Pos.Right(OSCWindow),
+            Y = Pos.Top(OSCWindow),
+            Width = Dim.Fill(),
+            Height = Dim.Fill()
+        };
+        Add(VMixWindow);
+
+        VMixEndpointLabel = new Label(0, 0, "VMix endpoint: ");
+        VMixLabel = new Label{Text = "VMix", X = Pos.Left(VMixEndpointLabel), Y = Pos.Bottom(VMixEndpointLabel)};
+        VMixWindow.Add(VMixEndpointLabel, VMixLabel);
+    }
+
+    private static void RefreshLabels()
+    {
+        OSCQueryLabel.Text = $"OSCQuery Service running at TCP {oscQuery.TcpPort} and UDP {oscQuery.TcpPort}";
+
+        OSCParametersList.Text = "";
+        //add all the parameters from the config
+        foreach (var param in config.Osc.Parameters.GetType().GetProperties())
+        {
+            OSCParametersList.Text += $"{param.Name}: {param.GetValue(config.Osc.Parameters)}\n";
+        }
+
+        VMixEndpointLabel.Text = $"VMix endpoint: {vmixclient.BaseAddress}";
+
+        UpdateRateLabel.Text = $"Update Rate: {config.UpdateRate}ms (every {config.UpdateRate / 1000f}s)";
+    }
+
+    public static async Task Startup()
     {
         //load in the config file'
         string xml = await File.ReadAllTextAsync("config.xml");
@@ -49,10 +133,6 @@ public static class Program
             .WithServiceName("VMix Tally Light Proxy")
             .Build();
 
-        Console.WriteLine(
-            $"OSCQuery Service started at TCP {oscQuery.TcpPort} and UDP {oscQuery.TcpPort}"
-        );
-
         await FindVRChatOSC();
 
         // Create a timer
@@ -66,9 +146,6 @@ public static class Program
         heartbeatTimer.Elapsed += new ElapsedEventHandler(SendProgramStatus);
         heartbeatTimer.Interval = 500;
         heartbeatTimer.Start();
-
-        //wait infinitely
-        await Task.Delay(-1);
     }
 
     private static async Task FindVRChatOSC()
@@ -82,9 +159,6 @@ public static class Program
         //we now need to find the specific connection for VRChat
         foreach (var service in services)
         {
-            Console.WriteLine(
-                $"Found OSCQuery Service: {service.name} at {service.address}:{service.port}"
-            );
             //check if it has the endpoint we need
             var tree = await Extensions.GetOSCTree(service.address, service.port);
             if (tree.GetNodeWithPath("/chatbox/input") != null) //this is just a endpoint we know *has* to exist in VRChat
@@ -110,11 +184,11 @@ public static class Program
     {
         try
         {
-            Address heartbeat = new(avatarParamPrefix + config.Osc.Parameters.Heartbeatparameter);
+            Address heartbeat = new(avatarParamPrefix + config.Osc.Parameters.Heartbeat);
             Heartbeat = !Heartbeat;
             await SendOSC(heartbeat, BoolToValue(Heartbeat));
 
-            Address error = new(avatarParamPrefix + config.Osc.Parameters.Errorparameter);
+            Address error = new(avatarParamPrefix + config.Osc.Parameters.Error);
             await SendOSC(error, BoolToValue(Error));
         }
         catch (Exception ex)
@@ -125,6 +199,10 @@ public static class Program
                 throw;
             }
         }
+
+        RefreshLabels();
+        //also refresh the screen here
+        Application.Refresh();
     }
 
     public static async void WatchVMIX(object source, ElapsedEventArgs e)
@@ -180,15 +258,15 @@ public static class Program
                     {
                         state = VMixState.Standby;
                     }
-                    Console.WriteLine($"You are currently: {state}");
+                    CurrentTallyStateLabel.Text = $"Current Tally State: {state}";
 
                     //setup endpoints
                     Address preview =
-                        new(avatarParamPrefix + config.Osc.Parameters.Previewparameter);
+                        new(avatarParamPrefix + config.Osc.Parameters.Preview);
                     Address program =
-                        new(avatarParamPrefix + config.Osc.Parameters.Programparameter);
+                        new(avatarParamPrefix + config.Osc.Parameters.Program);
                     Address standby =
-                        new(avatarParamPrefix + config.Osc.Parameters.Standbyparameter);
+                        new(avatarParamPrefix + config.Osc.Parameters.Standby);
 
                     //send OSC updates
                     await SendOSC(preview, BoolToValue(state == VMixState.Preview));
@@ -217,18 +295,10 @@ public static class Program
         switch (ex)
         {
             case HttpRequestException:
-                Console.WriteLine(
-                    "Could not communicate to VMix over HTTP, is the IP/Port correct or is VMix running?"
-                );
-                Console.WriteLine($"VMix Configured Endpoint: {config.Vmix.Ip}:{config.Vmix.Port}");
+                VMixLabel.Text = "Could not communicate to VMix over HTTP, is the IP/Port correct or is VMix running?";
                 break;
             case SocketException:
-                Console.WriteLine(
-                    "Could not communicate to VRChat over OSC, is the port/IP correct or is VRChat running? Attempting to reconnect..."
-                );
-                Console.WriteLine(
-                    $"VRChat OSC Configured Endpoint: {oscClient.Client.RemoteEndPoint}"
-                );
+                OSCLabel.Text = "Could not communicate to VRChat over OSC, is VRChat running?";
                 await FindVRChatOSC();
                 break;
             default:
