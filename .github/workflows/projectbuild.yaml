@@ -46,4 +46,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: VRCTally ${{ matrix.platform.name }} ${{ matrix.dotnet.name }}
-          path: './artifacts'
+          path: './artifacts/publish/VMixOSCProxy/release_${{ matrix.platform.rid }}'
