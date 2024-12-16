@@ -10,11 +10,11 @@
     </vmix>
     <osc>
         <parameters>
-            <preview>VRCLLime_Preview_Active</preview>
-            <program>VRCLLime_Program_Active</program>
-            <standby>VRCLLime_Standby_Active</standby>
-            <heartbeat>VRCLLime_Heartbeat</heartbeat>
-            <error>VRCLLime_Error</error>
+            <preview>VRCTally_Preview</preview>
+            <program>VRCTally_Program</program>
+            <standby>VRCTally_Standby</standby>
+            <heartbeat>VRCTally_Heartbeat</heartbeat>
+            <error>VRCTally_Error</error>
         </parameters>
     </osc>
 </config>

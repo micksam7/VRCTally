@@ -169,7 +169,7 @@ MonoBehaviour:
         simpleOutTransition: 1
         defaultSliderValue: 0
         useGlobalParam: 1
-        globalParam: VRCLLime_Program_Active
+        globalParam: VRCTally_Program
         holdButton: 0
         invertRestLogic: 0
         expandIntoTransition: 1
@@ -259,7 +259,7 @@ MonoBehaviour:
         simpleOutTransition: 1
         defaultSliderValue: 0
         useGlobalParam: 1
-        globalParam: VRCLLime_Preview_Active
+        globalParam: VRCTally_Preview
         holdButton: 0
         invertRestLogic: 0
         expandIntoTransition: 1
@@ -349,7 +349,7 @@ MonoBehaviour:
         simpleOutTransition: 1
         defaultSliderValue: 0
         useGlobalParam: 1
-        globalParam: VRCLLime_Standby_Active
+        globalParam: VRCTally_Standby
         holdButton: 0
         invertRestLogic: 0
         expandIntoTransition: 1
@@ -439,7 +439,7 @@ MonoBehaviour:
         simpleOutTransition: 1
         defaultSliderValue: 0
         useGlobalParam: 1
-        globalParam: VRCLLime_Error
+        globalParam: VRCTally_Error
         holdButton: 0
         invertRestLogic: 0
         expandIntoTransition: 1
@@ -498,7 +498,7 @@ MonoBehaviour:
         prms: []
         smoothedPrms: []
         globalParams:
-        - VRCLLime_Heartbeat
+        - VRCTally_Heartbeat
         allNonsyncedAreGlobal: 0
         ignoreSaved: 0
         toggleParam: 
