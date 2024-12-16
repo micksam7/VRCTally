@@ -42,4 +42,9 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
       - name: Publish
-        run: dotnet publish --self-contained
+        run: dotnet publish --self-contained --artifacts-path ./artifacts
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform.name }} ${{ matrix.dotnet.name }}
+          path: './artifacts'
