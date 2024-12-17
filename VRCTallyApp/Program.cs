@@ -199,7 +199,10 @@ public class ProgramWindow : Window
 
             //try to find the input with the name the user entered, otherwise print an error and skip everything else
             //we need to search with wildcard * in mind
-            input = vmix.Inputs.Input.FirstOrDefault(i => i.Title.StartsWith(config.Vmix.Tally));
+            input = vmix.Inputs.Input.FirstOrDefault(
+                i => i.Title.StartsWith(config.Vmix.Tally),
+                new Input() //make sure there is a empty input if we don't find anything
+            );
             if (input == null)
             {
                 config.Osc.Parameters.Error.Value = true;
