@@ -8,16 +8,135 @@ using CoreOSC;
 using CoreOSC.IO;
 using VRC.OSCQuery;
 using System.Net.Sockets;
+using Terminal.Gui;
+using MeaMod.DNS.Model;
 
-public static class Program
+//start main
+await ProgramWindow.Main();
+Application.Run<ProgramWindow>();
+
+public class ProgramWindow : Window
 {
     private static HttpClient vmixclient = new();
-    private static UdpClient oscClient = new();
-    private static OSCQueryService oscQuery;
     private static Config config;
-    private static bool Heartbeat = false;
-    private static bool Error = false;
-    const string avatarParamPrefix = "/avatar/parameters/";
+    private static string VMixXML = "";
+    private static Input input = new();
+    private static VMixAPI.Vmix vmix = new();
+
+    public ProgramWindow()
+        : base("VRCTally - VMix OSC Proxy - Happyrobot33")
+    {
+        X = 0;
+        Y = 0;
+        Width = Dim.Fill();
+        Height = Dim.Fill();
+
+        //setup two subviews, one for OSC and one for VMix
+        Window oscView =
+            new("OSC")
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Percent(50),
+                Height = Dim.Fill(),
+            };
+        Add(oscView);
+
+        var oscQueryInfo = new Label("Hello, world!") { X = 0, Y = 0, };
+        oscQueryInfo.DrawContent += (e) =>
+        {
+            oscQueryInfo.Text =
+                $"OSCQuery Service running at TCP {config.Osc.oscQuery.TcpPort} and UDP {config.Osc.oscQuery.TcpPort}";
+        };
+        oscView.Add(oscQueryInfo);
+
+        var oscConnectionInfo = new Label("Hello, world!") { Y = Pos.Bottom(oscQueryInfo), };
+        oscConnectionInfo.DrawContent += (e) =>
+        {
+            if (config.Osc.oscClient.Client.Connected)
+            {
+                oscConnectionInfo.Text =
+                    $"VRChat OSC Client running at {config.Osc.oscClient.Client.RemoteEndPoint}";
+            }
+            else
+            {
+                oscConnectionInfo.Text = "VRChat OSC Client not connected!";
+            }
+        };
+        oscView.Add(oscConnectionInfo);
+
+        //we want to add a sub view that shows all the parameters
+        oscView.Add(
+            config.Osc.Parameters.GetWindow(
+                0,
+                Pos.Bottom(oscConnectionInfo),
+                Dim.Fill(),
+                Dim.Fill()
+            )
+        );
+
+        Window vmixView =
+            new("VMix")
+            {
+                X = Pos.Right(oscView),
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill(),
+            };
+        Add(vmixView);
+
+        var vmixConnectionInfo = new Label("Hello, world!") { X = 0, Y = 0, };
+        vmixConnectionInfo.DrawContent += (e) =>
+        {
+            //TODO: Make this tell if we have a connection or not
+            vmixConnectionInfo.Text = $"Connected to VMix at {vmixclient.BaseAddress}";
+        };
+        vmixView.Add(vmixConnectionInfo);
+
+        var vmixXMLInfo = new Label("Hello, world!") { X = 0, Y = Pos.Bottom(vmixConnectionInfo), };
+        vmixXMLInfo.DrawContent += (e) =>
+        {
+            //TODO: Make this tell if we have a connection or not
+            vmixXMLInfo.Text = $"VMix XML Character Count: {VMixXML.Length}";
+        };
+        vmixView.Add(vmixXMLInfo);
+
+        var vmixVersionInfo = new Label("Hello, world!") { X = 0, Y = Pos.Bottom(vmixXMLInfo), };
+        vmixVersionInfo.DrawContent += (e) =>
+        {
+            vmixVersionInfo.Text = $"VMix Version: {vmix.Version}";
+        };
+        vmixView.Add(vmixVersionInfo);
+
+        var trackedTally = new Label("Hello, world!") { X = 0, Y = Pos.Bottom(vmixVersionInfo), };
+        trackedTally.DrawContent += (e) =>
+        {
+            trackedTally.Text = $"Configured Tally: {config.Vmix.Tally}";
+            trackedTally.Text += $"\nVMix Matched Input: {input.Title}";
+        };
+        vmixView.Add(trackedTally);
+
+        var currentOutputs = new Label("Hello, world!") { X = 0, Y = Pos.Bottom(trackedTally), };
+        currentOutputs.DrawContent += (e) =>
+        {
+            currentOutputs.Text =
+                $"Current {VMixState.Preview} in VMix: {InterpretInputToState(vmix.PreviewInput)}";
+            currentOutputs.Text +=
+                $"\nCurrent {VMixState.Live} in VMix: {InterpretInputToState(vmix.ActiveInput)}";
+        };
+        vmixView.Add(currentOutputs);
+
+        var currentTallyStatus = new Label("Hello, world!")
+        {
+            X = 0,
+            Y = Pos.Bottom(currentOutputs),
+        };
+        currentTallyStatus.DrawContent += (e) =>
+        {
+            currentTallyStatus.Text = $"Current Tally Status: {InterpretInputToState(input)}";
+        };
+        vmixView.Add(currentTallyStatus);
+    }
 
     public static async Task Main()
     {
@@ -28,6 +147,7 @@ public static class Program
         using (StringReader reader = new StringReader(xml))
         {
             config = (Config)serializer.Deserialize(reader);
+            config.Osc.StartTimers(config);
         }
 
         //setup HTTP[s] request
@@ -45,228 +165,90 @@ public static class Program
             )
         );
 
-        //startup oscquery service
-        oscQuery = new OSCQueryServiceBuilder()
-            // First, modify class' properties.
-            .WithTcpPort(Extensions.GetAvailableTcpPort())
-            .WithServiceName("VRCTally")
-            // Then activate server with this function
-            .WithDefaults()
-            .Build();
-
-        Console.WriteLine(
-            $"OSCQuery Service started at TCP {oscQuery.TcpPort} and UDP {oscQuery.TcpPort}"
-        );
-
-        await FindVRChatOSC();
-
         // Create a timer
         System.Timers.Timer mainTimer = new System.Timers.Timer();
         mainTimer.Elapsed += new ElapsedEventHandler(WatchVMIX);
-        mainTimer.Interval = config.UpdateRate;
+        mainTimer.Interval = config.Vmix.UpdateRate;
         mainTimer.Start();
 
-        //setup a seperate timer that always has the same update rate for the heartbeat
-        System.Timers.Timer heartbeatTimer = new System.Timers.Timer();
-        heartbeatTimer.Elapsed += new ElapsedEventHandler(SendProgramStatus);
-        heartbeatTimer.Interval = 500;
-        heartbeatTimer.Start();
+        System.Timers.Timer appRefresh = new System.Timers.Timer();
+        mainTimer.Elapsed += new ElapsedEventHandler((source, e) => Application.Refresh());
+        mainTimer.Interval = 100;
+        mainTimer.Start();
 
         //wait infinitely
-        await Task.Delay(-1);
-    }
-
-    private static async Task FindVRChatOSC()
-    {
-        //oscClient = new("127.0.0.1", 9000);
-
-        List<OSCQueryServiceProfile> services =
-        [
-            //add all to a list
-            .. oscQuery.GetOSCQueryServices(),
-        ];
-
-        //we now need to find the specific connection for VRChat
-        foreach (var service in services)
-        {
-            Console.WriteLine(
-                $"Found OSCQuery Service: {service.name} at {service.address}:{service.port}"
-            );
-            //check if it has the endpoint we need
-            var tree = await Extensions.GetOSCTree(service.address, service.port);
-            if (tree.GetNodeWithPath("/chatbox/input") != null) //this is just a endpoint we know *has* to exist in VRChat
-            {
-                //get host info
-                VRC.OSCQuery.HostInfo Hostinfo = await Extensions.GetHostInfo(service.address, service.port);
-                //setup OSC client
-                string IP = Hostinfo.oscIP;
-                int port = Hostinfo.oscPort;
-                oscClient = new(IP, port);
-            }
-        }
+        //await Task.Delay(-1);
     }
 
     //create a enum to represent the state of the VMix
-
     public enum VMixState
     {
         Live,
         Preview,
-        Standby
-    }
-
-    public static async void SendProgramStatus(object source, ElapsedEventArgs e)
-    {
-        try
-        {
-            Address heartbeat = new(avatarParamPrefix + config.Osc.Parameters.Heartbeat);
-            Heartbeat = !Heartbeat;
-            await SendOSC(heartbeat, BoolToValue(Heartbeat));
-
-            Address error = new(avatarParamPrefix + config.Osc.Parameters.Error);
-            await SendOSC(error, BoolToValue(Error));
-        }
-        catch (Exception ex)
-        {
-            //if log exception is true, throw
-            if (LogException(ex).Result)
-            {
-                throw;
-            }
-        }
+        Standby,
+        Unknown
     }
 
     public static async void WatchVMIX(object source, ElapsedEventArgs e)
     {
-        //clear console
-        Console.Clear();
-        Console.WriteLine("VRCTally - VMix OSC Proxy - Happyrobot33");
         try
         {
             //request VMix XML
-            string xml = await vmixclient.GetStringAsync("");
-            Console.WriteLine($"VMix XML Received, Length: {xml.Length}");
+            VMixXML = await vmixclient.GetStringAsync("");
 
             //replace all "False" with "false" and "True" with "true"
-            xml = xml.Replace("False", "false").Replace("True", "true");
+            VMixXML = VMixXML.Replace("False", "false").Replace("True", "true");
 
-            XmlSerializer serializer = new XmlSerializer(typeof(VMixAPI.Vmix));
-            using (StringReader reader = new StringReader(xml))
+            vmix = VMixAPI.Vmix.FromXML(VMixXML);
+
+            //try to find the input with the name the user entered, otherwise print an error and skip everything else
+            //we need to search with wildcard * in mind
+            input = vmix.Inputs.Input.FirstOrDefault(i => i.Title.StartsWith(config.Vmix.Tally));
+            if (input == null)
             {
-                VMixAPI.Vmix vmix = (VMixAPI.Vmix)serializer.Deserialize(reader);
+                config.Osc.Parameters.Error.Value = true;
+            }
+            else
+            {
+                VMixState state = InterpretInputToState(input);
 
-                //print VMix version
-                Console.WriteLine($"VMix version: {vmix.Version}");
-
-                //try to find the input with the name the user entered, otherwise print an error and skip everything else
-                //we need to search with wildcard * in mind
-                Input input = vmix.Inputs.Input.FirstOrDefault(i => i.Title.StartsWith(config.Vmix.Tally));
-                if (input == null)
-                {
-                    Console.WriteLine($"Input with name '{config.Vmix.Tally}' not found");
-                    Error = true;
-                }
-                else
-                {
-                    Console.WriteLine($"Your Tally is: {input.Title}");
-
-                    //print current in preview and in active
-                    Console.WriteLine(
-                        $"Current {VMixState.Preview} in VMix: {vmix.PreviewInput.Title}"
-                    );
-                    Console.WriteLine(
-                        $"Current {VMixState.Live} in VMix: {vmix.ActiveInput.Title}"
-                    );
-
-                    //determine if we are live, preview or standby
-                    VMixState state;
-                    if (vmix.Active == input.Number) //this needs to be first to ensure that if you are both active and previewed, that you are considered live
-                    {
-                        state = VMixState.Live;
-                    }
-                    else if (vmix.Preview == input.Number)
-                    {
-                        state = VMixState.Preview;
-                    }
-                    else
-                    {
-                        state = VMixState.Standby;
-                    }
-                    Console.WriteLine($"You are currently: {state}");
-
-                    //setup endpoints
-                    Address preview =
-                        new(avatarParamPrefix + config.Osc.Parameters.Preview);
-                    Address program =
-                        new(avatarParamPrefix + config.Osc.Parameters.Program);
-                    Address standby =
-                        new(avatarParamPrefix + config.Osc.Parameters.Standby);
-
-                    //send OSC updates
-                    await SendOSC(preview, BoolToValue(state == VMixState.Preview));
-                    await SendOSC(program, BoolToValue(state == VMixState.Live));
-                    await SendOSC(standby, BoolToValue(state == VMixState.Standby));
-                    //clear error state
-                    Error = false;
-                }
+                //send OSC updates
+                config.Osc.Parameters.Preview.Value = state == VMixState.Preview;
+                config.Osc.Parameters.Program.Value = state == VMixState.Live;
+                config.Osc.Parameters.Standby.Value = state == VMixState.Standby;
+                //clear error state
+                config.Osc.Parameters.Error.Value = false;
             }
         }
         catch (Exception ex)
         {
-            //if log exception is true, throw
-            if (LogException(ex).Result)
-            {
-                throw;
-            }
-
             //set error state
-            Error = true;
+            config.Osc.Parameters.Error.Value = true;
         }
     }
 
-    private static async Task<bool> LogException(Exception ex)
+    private static VMixState InterpretInputToState(Input? input)
     {
-        switch (ex)
+        if (input == null || input?.Number == -1)
         {
-            case HttpRequestException:
-                Console.WriteLine(
-                    "Could not communicate to VMix over HTTP, is the IP/Port correct or is VMix running?"
-                );
-                Console.WriteLine($"VMix Configured Endpoint: {config.Vmix.Ip}:{config.Vmix.Port}");
-                break;
-            case SocketException:
-                Console.WriteLine(
-                    "Could not communicate to VRChat over OSC, is the port/IP correct or is VRChat running? Attempting to reconnect..."
-                );
-                Console.WriteLine(
-                    $"VRChat OSC Configured Endpoint: {oscClient.Client.RemoteEndPoint}"
-                );
-                await FindVRChatOSC();
-                break;
-            case TaskCanceledException:
-                Console.WriteLine("Request to VMix timed out, is the IP/Port correct?");
-                break;
-            default:
-                //return failed
-                return true;
+            return VMixState.Unknown;
         }
-        //return success
-        return false;
-    }
 
-    public static async Task SendOSC(Address address, params object[] values)
-    {
-        var message = new OscMessage(address, values);
-        await oscClient.SendMessageAsync(message);
-    }
+        //determine if we are live, preview or standby
+        VMixState state;
+        if (vmix.ActiveInput == input) //this needs to be first to ensure that if you are both active and previewed, that you are considered live
+        {
+            state = VMixState.Live;
+        }
+        else if (vmix.PreviewInput == input)
+        {
+            state = VMixState.Preview;
+        }
+        else
+        {
+            state = VMixState.Standby;
+        }
 
-    /// <summary>
-    /// Convert a boolean to a OSC value
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    public static object BoolToValue(bool value)
-    {
-        return value ? OscTrue.True : OscFalse.False;
+        return state;
     }
 }

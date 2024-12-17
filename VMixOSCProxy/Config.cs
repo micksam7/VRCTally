@@ -1,4 +1,5 @@
 using System.Xml.Serialization;
+using CoreOSC;
 
 namespace ConfigXML
 {
@@ -19,32 +20,9 @@ namespace ConfigXML
 
         [XmlElement(ElementName = "tally")]
         public required string Tally { get; set; }
-    }
 
-    [XmlRoot(ElementName = "osc")]
-    public class Osc
-    {
-        [XmlElement(ElementName = "parameters")]
-        public required Parameters Parameters { get; set; }
-    }
-
-    [XmlRoot(ElementName = "parameters")]
-    public class Parameters
-    {
-        [XmlElement(ElementName = "preview")]
-        public required string Preview { get; set; }
-
-        [XmlElement(ElementName = "program")]
-        public required string Program { get; set; }
-
-        [XmlElement(ElementName = "standby")]
-        public required string Standby { get; set; }
-
-        [XmlElement(ElementName = "heartbeat")]
-        public required string Heartbeat { get; set; }
-
-        [XmlElement(ElementName = "error")]
-        public required string Error { get; set; }
+        [XmlElement(ElementName = "updaterate")]
+        public int UpdateRate { get; set; }
     }
 
     [XmlRoot(ElementName = "config")]
@@ -55,8 +33,5 @@ namespace ConfigXML
 
         [XmlElement(ElementName = "osc")]
         public required Osc Osc { get; set; }
-
-        [XmlElement(ElementName = "updaterate")]
-        public int UpdateRate { get; set; }
     }
 }

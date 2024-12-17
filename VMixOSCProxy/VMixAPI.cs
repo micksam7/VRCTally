@@ -6,22 +6,22 @@ namespace VMixAPI
     public class Input
     {
         [XmlAttribute(AttributeName = "key")]
-        public string Key { get; set; }
+        public string Key { get; set; } = "???";
 
         [XmlAttribute(AttributeName = "number")]
-        public int Number { get; set; }
+        public int Number { get; set; } = -1;
 
         [XmlAttribute(AttributeName = "type")]
-        public string Type { get; set; }
+        public string Type { get; set; } = "???";
 
         [XmlAttribute(AttributeName = "title")]
-        public string Title { get; set; }
+        public string Title { get; set; } = "???";
 
         [XmlAttribute(AttributeName = "shortTitle")]
-        public string ShortTitle { get; set; }
+        public string ShortTitle { get; set; } = "???";
 
         [XmlAttribute(AttributeName = "state")]
-        public string State { get; set; }
+        public string State { get; set; } = "???";
 
         [XmlAttribute(AttributeName = "position")]
         public int Position { get; set; }
@@ -33,7 +33,7 @@ namespace VMixAPI
         public bool Loop { get; set; }
 
         [XmlText]
-        public string Text { get; set; }
+        public string Text { get; set; } = "???";
     }
 
     [XmlRoot(ElementName = "inputs")]
@@ -47,21 +47,21 @@ namespace VMixAPI
     public class Vmix
     {
         [XmlElement(ElementName = "version")]
-        public string Version { get; set; }
+        public string Version { get; set; } = "???";
 
         [XmlElement(ElementName = "edition")]
-        public string Edition { get; set; }
+        public string? Edition { get; set; }
 
         [XmlElement(ElementName = "inputs")]
-        public Inputs Inputs { get; set; }
+        public Inputs? Inputs { get; set; }
 
         [XmlElement(ElementName = "preview")]
         public int Preview { get; set; }
-        public Input PreviewInput => Inputs.Input.FirstOrDefault(i => i.Number == Preview);
+        public Input? PreviewInput => Inputs?.Input.FirstOrDefault(i => i.Number == Preview);
 
         [XmlElement(ElementName = "active")]
         public int Active { get; set; }
-        public Input ActiveInput => Inputs.Input.FirstOrDefault(i => i.Number == Active);
+        public Input? ActiveInput => Inputs?.Input.FirstOrDefault(i => i.Number == Active);
 
         [XmlElement(ElementName = "fadeToBlack")]
         public bool FadeToBlack { get; set; }
@@ -83,5 +83,14 @@ namespace VMixAPI
 
         [XmlElement(ElementName = "fullscreen")]
         public bool Fullscreen { get; set; }
+
+        public static Vmix FromXML(string xml)
+        {
+            var serializer = new XmlSerializer(typeof(Vmix));
+            using (var reader = new StringReader(xml))
+            {
+                return (Vmix)serializer.Deserialize(reader);
+            }
+        }
     }
 }
