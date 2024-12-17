@@ -17,9 +17,7 @@ jobs:
     - run: |
         echo "Assets/VRCTally.meta" > ./VRCTallyUnityAvatar/metaList
         cd ./VRCTallyUnityAvatar
-        find ./VRCTallyUnityAvatar/Assets/VRCTally/ -name \*.meta >> ./VRCTallyUnityAvatar/metaList
-
-    - run: mkdir a
+        find /Assets/VRCTally/ -name \*.meta >> ./VRCTallyUnityAvatar/metaList
 
     - uses: pCYSl5EDgo/create-unitypackage@master
       with:
