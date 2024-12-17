@@ -16,7 +16,6 @@ public class ProgramWindow : Window
     public static HttpClient vmixclient = new();
     public static Config config;
     private static string VMixXML = "";
-    private static Input input = new();
     private static VMixAPI.Vmix vmix = new();
 
     public ProgramWindow()
@@ -159,13 +158,13 @@ public class ProgramWindow : Window
 
             vmix = VMixAPI.Vmix.FromXML(VMixXML);
 
-            if (input == null)
+            if (vmix.tallyInput == null)
             {
                 config.Osc.Parameters.Error.Value = true;
             }
             else
             {
-                VMixState state = InterpretInputToState(input);
+                VMixState state = InterpretInputToState(vmix.tallyInput);
 
                 //send OSC updates
                 config.Osc.Parameters.Preview.Value = state == VMixState.Preview;
@@ -179,8 +178,6 @@ public class ProgramWindow : Window
         {
             //set error state
             config.Osc.Parameters.Error.Value = true;
-
-            throw;
         }
     }
 
