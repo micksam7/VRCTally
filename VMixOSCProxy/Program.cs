@@ -115,9 +115,8 @@ public class ProgramWindow : Window
         currentOutputs.DrawContent += (e) =>
         {
             currentOutputs.Text =
-                $"Current {VMixState.Preview} in VMix: {InterpretInputToState(vmix.PreviewInput)}";
-            currentOutputs.Text +=
-                $"\nCurrent {VMixState.Live} in VMix: {InterpretInputToState(vmix.ActiveInput)}";
+                $"Current {VMixState.Preview} in VMix: {vmix.PreviewInput?.Title}";
+            currentOutputs.Text += $"\nCurrent {VMixState.Live} in VMix: {vmix.ActiveInput?.Title}";
         };
         vmixView.Add(currentOutputs);
 
