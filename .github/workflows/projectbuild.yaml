@@ -16,7 +16,7 @@ jobs:
 
     - run: |
         echo "Assets/VRCTally.meta" > ./VRCTallyUnityAvatar/metaList
-        find Assets/VRCTally/ -name \*.meta >> ./VRCTallyUnityAvatar/metaList
+        find ./VRCTallyUnityAvatar/Assets/VRCTally/ -name \*.meta >> ./VRCTallyUnityAvatar/metaList
 
     - run: mkdir a
 
