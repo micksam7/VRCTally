@@ -140,6 +140,7 @@ public static class Program
     {
         //clear console
         Console.Clear();
+        Console.WriteLine("VRCTally - VMix OSC Proxy - Happyrobot33");
         try
         {
             //request VMix XML
