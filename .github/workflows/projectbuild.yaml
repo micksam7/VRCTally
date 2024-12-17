@@ -9,7 +9,30 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
  
 jobs:
-  build:
+  build Avatar Package:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - run: |
+        echo "Assets/VRCTally.meta" > metaList
+        find Assets/VRCTally/ -name \*.meta >> metaList
+
+    - run: mkdir a
+
+    - uses: pCYSl5EDgo/create-unitypackage@master
+      with:
+        package-path: 'output.unitypackage'
+        include-files: metaList
+        working-folder: ./VRCTallyUnityAvatar
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: VRCTally Avatar Package
+        path: './VRCTallyUnityAvatar/output.unitypackage'
+
+  build C#:
     name: ${{ matrix.platform.name }} ${{ matrix.dotnet.name }}
     runs-on: ubuntu-22.04
      
