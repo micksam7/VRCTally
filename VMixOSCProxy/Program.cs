@@ -33,7 +33,9 @@ public static class Program
         //setup HTTP[s] request
         vmixclient = new()
         {
-            BaseAddress = new Uri($"http://{config.Vmix.Ip}:{config.Vmix.Port}/API")
+            BaseAddress = new Uri($"http://{config.Vmix.Ip}:{config.Vmix.Port}/API"),
+            //set the timeout really low
+            Timeout = TimeSpan.FromSeconds(1)
         };
         //username and password requirement
         vmixclient.DefaultRequestHeaders.Authorization = new(
@@ -237,6 +239,9 @@ public static class Program
                     $"VRChat OSC Configured Endpoint: {oscClient.Client.RemoteEndPoint}"
                 );
                 await FindVRChatOSC();
+                break;
+            case TaskCanceledException:
+                Console.WriteLine("Request to VMix timed out, is the IP/Port correct?");
                 break;
             default:
                 //return failed
