@@ -41,8 +41,15 @@ public class ProgramWindow : Window
         var vmixConnectionInfo = new Label("Hello, world!") { X = 0, Y = 0, };
         vmixConnectionInfo.DrawContent += (e) =>
         {
-            //TODO: Make this tell if we have a connection or not
-            vmixConnectionInfo.Text = $"Connected to VMix at {vmixclient.BaseAddress}";
+            if (vmix.valid)
+            {
+                vmixConnectionInfo.Text = $"Connected to VMix at {vmixclient.BaseAddress}";
+            }
+            else
+            {
+                vmixConnectionInfo.Text =
+                    $"Attempting to connect to VMix at {vmixclient.BaseAddress}";
+            }
         };
         vmixView.Add(vmixConnectionInfo);
 
@@ -113,7 +120,7 @@ public class ProgramWindow : Window
         {
             BaseAddress = new Uri($"http://{config.Vmix.Ip}:{config.Vmix.Port}/API"),
             //set the timeout really low
-            Timeout = TimeSpan.FromSeconds(1)
+            //Timeout = TimeSpan.FromSeconds(1)
         };
         //username and password requirement
         vmixclient.DefaultRequestHeaders.Authorization = new(
@@ -153,8 +160,17 @@ public class ProgramWindow : Window
     {
         try
         {
-            //request VMix XML
-            VMixXML = await vmixclient.GetStringAsync("");
+            try
+            {
+                //request VMix XML
+                VMixXML = await vmixclient.GetStringAsync("");
+            }
+            catch
+            {
+                //explicitely clear the vmix info
+                vmix = new();
+                throw;
+            }
 
             vmix = VMixAPI.Vmix.FromXML(VMixXML);
 

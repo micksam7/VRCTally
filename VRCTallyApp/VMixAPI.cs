@@ -60,11 +60,13 @@ namespace VMixAPI
 
         [XmlElement(ElementName = "preview")]
         public int Preview { get; set; }
-        public Input? PreviewInput => Inputs?.Input.FirstOrDefault(i => i.Number == Preview);
+        public Input PreviewInput =>
+            Inputs?.Input.FirstOrDefault(i => i.Number == Preview) ?? new Input();
 
         [XmlElement(ElementName = "active")]
         public int Active { get; set; }
-        public Input? ActiveInput => Inputs?.Input.FirstOrDefault(i => i.Number == Active);
+        public Input ActiveInput =>
+            Inputs?.Input.FirstOrDefault(i => i.Number == Active) ?? new Input();
 
         [XmlElement(ElementName = "fadeToBlack")]
         public bool FadeToBlack { get; set; }
@@ -100,6 +102,9 @@ namespace VMixAPI
         [XmlIgnore]
         public int xmlCharacterCount;
 
+        [XmlIgnore]
+        public bool valid = false;
+
         public static Vmix FromXML(string xml)
         {
             //start a timer
@@ -117,8 +122,9 @@ namespace VMixAPI
 
                 //stop the timer
                 watch.Stop();
-                vm.deserializationTime = watch.Elapsed;
                 //store the time it took to deserialize
+                vm.deserializationTime = watch.Elapsed;
+                vm.valid = true;
                 return vm;
             }
         }
