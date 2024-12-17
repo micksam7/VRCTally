@@ -186,8 +186,8 @@ public class ProgramWindow : Window
                 config.Osc.Parameters.Preview.Value = state == VMixState.Preview;
                 config.Osc.Parameters.Program.Value = state == VMixState.Live;
                 config.Osc.Parameters.Standby.Value = state == VMixState.Standby;
-                //clear error state
-                config.Osc.Parameters.Error.Value = false;
+                //clear error state, but make sure if we cant find the input that we still error
+                config.Osc.Parameters.Error.Value = state == VMixState.Unknown;
             }
         }
         catch (Exception ex)
