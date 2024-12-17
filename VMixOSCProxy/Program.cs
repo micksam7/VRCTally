@@ -167,7 +167,9 @@ public class ProgramWindow : Window
         mainTimer.Start();
 
         System.Timers.Timer appRefresh = new System.Timers.Timer();
-        mainTimer.Elapsed += new ElapsedEventHandler((source, e) => Application.Refresh());
+        mainTimer.Elapsed += new ElapsedEventHandler(
+            (source, e) => Application.MainLoop.Invoke(() => Application.Refresh())
+        );
         mainTimer.Interval = 100;
         mainTimer.Start();
 
