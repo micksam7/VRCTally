@@ -4,12 +4,7 @@ using System.Timers;
 using System.Xml.Serialization;
 using ConfigXML;
 using VMixAPI;
-using CoreOSC;
-using CoreOSC.IO;
-using VRC.OSCQuery;
-using System.Net.Sockets;
 using Terminal.Gui;
-using MeaMod.DNS.Model;
 
 //start main
 await ProgramWindow.Main();
