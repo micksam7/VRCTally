@@ -32,7 +32,7 @@ jobs:
         name: VRCTally Avatar Package
         path: './VRCTallyUnityAvatar/output.unitypackage'
 
-  build_C#:
+  build_CSharp:
     name: ${{ matrix.platform.name }} ${{ matrix.dotnet.name }}
     runs-on: ubuntu-22.04
      
