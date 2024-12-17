@@ -9,11 +9,12 @@ using Terminal.Gui;
 //start main
 await ProgramWindow.Main();
 Application.Run<ProgramWindow>();
+await Task.Delay(-1);
 
 public class ProgramWindow : Window
 {
-    private static HttpClient vmixclient = new();
-    private static Config config;
+    public static HttpClient vmixclient = new();
+    public static Config config;
     private static string VMixXML = "";
     private static Input input = new();
     private static VMixAPI.Vmix vmix = new();
@@ -26,49 +27,8 @@ public class ProgramWindow : Window
         Width = Dim.Fill();
         Height = Dim.Fill();
 
-        //setup two subviews, one for OSC and one for VMix
-        Window oscView =
-            new("OSC")
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Percent(50),
-                Height = Dim.Fill(),
-            };
+        var oscView = config.Osc.GetWindow(0, 0, Dim.Percent(50), Dim.Fill());
         Add(oscView);
-
-        var oscQueryInfo = new Label("Hello, world!") { X = 0, Y = 0, };
-        oscQueryInfo.DrawContent += (e) =>
-        {
-            oscQueryInfo.Text =
-                $"OSCQuery Service running at TCP {config.Osc.oscQuery.TcpPort} and UDP {config.Osc.oscQuery.TcpPort}";
-        };
-        oscView.Add(oscQueryInfo);
-
-        var oscConnectionInfo = new Label("Hello, world!") { Y = Pos.Bottom(oscQueryInfo), };
-        oscConnectionInfo.DrawContent += (e) =>
-        {
-            if (config.Osc.oscClient.Client.Connected)
-            {
-                oscConnectionInfo.Text =
-                    $"VRChat OSC Client running at {config.Osc.oscClient.Client.RemoteEndPoint}";
-            }
-            else
-            {
-                oscConnectionInfo.Text = "VRChat OSC Client not connected!";
-            }
-        };
-        oscView.Add(oscConnectionInfo);
-
-        //we want to add a sub view that shows all the parameters
-        oscView.Add(
-            config.Osc.Parameters.GetWindow(
-                0,
-                Pos.Bottom(oscConnectionInfo),
-                Dim.Fill(),
-                Dim.Fill()
-            )
-        );
 
         Window vmixView =
             new("VMix")
@@ -78,7 +38,6 @@ public class ProgramWindow : Window
                 Width = Dim.Fill(),
                 Height = Dim.Fill(),
             };
-        Add(vmixView);
 
         var vmixConnectionInfo = new Label("Hello, world!") { X = 0, Y = 0, };
         vmixConnectionInfo.DrawContent += (e) =>
@@ -92,7 +51,9 @@ public class ProgramWindow : Window
         vmixXMLInfo.DrawContent += (e) =>
         {
             //TODO: Make this tell if we have a connection or not
-            vmixXMLInfo.Text = $"VMix XML Character Count: {VMixXML.Length}";
+            vmixXMLInfo.Text = $"VMix XML Character Count: {vmix.xmlCharacterCount}";
+            vmixXMLInfo.Text +=
+                $"\nDeserialization Time: {vmix.deserializationTime.TotalMicroseconds}μs";
         };
         vmixView.Add(vmixXMLInfo);
 
@@ -107,7 +68,7 @@ public class ProgramWindow : Window
         trackedTally.DrawContent += (e) =>
         {
             trackedTally.Text = $"Configured Tally: {config.Vmix.Tally}";
-            trackedTally.Text += $"\nVMix Matched Input: {input.Title}";
+            trackedTally.Text += $"\nVMix Matched Input: {vmix.tallyInput.Title}";
         };
         vmixView.Add(trackedTally);
 
@@ -116,7 +77,8 @@ public class ProgramWindow : Window
         {
             currentOutputs.Text =
                 $"Current {VMixState.Preview} in VMix: {vmix.PreviewInput?.Title}";
-            currentOutputs.Text += $"\nCurrent {VMixState.Live} in VMix: {vmix.ActiveInput?.Title}";
+            currentOutputs.Text +=
+                $"\nCurrent {VMixState.Preview} in VMix: {vmix.ActiveInput?.Title}";
         };
         vmixView.Add(currentOutputs);
 
@@ -127,9 +89,12 @@ public class ProgramWindow : Window
         };
         currentTallyStatus.DrawContent += (e) =>
         {
-            currentTallyStatus.Text = $"Current Tally Status: {InterpretInputToState(input)}";
+            currentTallyStatus.Text =
+                $"Current Tally Status: {InterpretInputToState(vmix.tallyInput)}";
         };
         vmixView.Add(currentTallyStatus);
+
+        Add(vmixView);
     }
 
     public static async Task Main()
@@ -141,7 +106,7 @@ public class ProgramWindow : Window
         using (StringReader reader = new StringReader(xml))
         {
             config = (Config)serializer.Deserialize(reader);
-            config.Osc.StartTimers(config);
+            config.Osc.StartTimers();
         }
 
         //setup HTTP[s] request
@@ -192,17 +157,8 @@ public class ProgramWindow : Window
             //request VMix XML
             VMixXML = await vmixclient.GetStringAsync("");
 
-            //replace all "False" with "false" and "True" with "true"
-            VMixXML = VMixXML.Replace("False", "false").Replace("True", "true");
-
             vmix = VMixAPI.Vmix.FromXML(VMixXML);
 
-            //try to find the input with the name the user entered, otherwise print an error and skip everything else
-            //we need to search with wildcard * in mind
-            input = vmix.Inputs.Input.FirstOrDefault(
-                i => i.Title.StartsWith(config.Vmix.Tally),
-                new Input() //make sure there is a empty input if we don't find anything
-            );
             if (input == null)
             {
                 config.Osc.Parameters.Error.Value = true;
@@ -223,10 +179,12 @@ public class ProgramWindow : Window
         {
             //set error state
             config.Osc.Parameters.Error.Value = true;
+
+            throw;
         }
     }
 
-    private static VMixState InterpretInputToState(Input? input)
+    public static VMixState InterpretInputToState(Input? input)
     {
         if (input == null || input?.Number == -1)
         {

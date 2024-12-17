@@ -35,11 +35,11 @@ namespace ConfigXML
             FindVRChatOSC().Wait();
         }
 
-        public void StartTimers(Config conf)
+        public void StartTimers()
         {
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Elapsed += new ElapsedEventHandler(UpdateOSC);
-            timer.Interval = conf.Osc.UpdateRate;
+            timer.Interval = ProgramWindow.config.Osc.UpdateRate;
             timer.Start();
 
             //heartbeat timer is seperate since it should always be running at a set rate
@@ -114,6 +114,54 @@ namespace ConfigXML
         public static object BoolToValue(bool value)
         {
             return value ? OscTrue.True : OscFalse.False;
+        }
+
+        public Window GetWindow(Pos x, Pos y, Dim width, Dim height)
+        {
+            //setup two subviews, one for OSC and one for VMix
+        Window oscView =
+            new("OSC")
+            {
+                X = x,
+                Y = y,
+                Width = width,
+                Height = height,
+            };
+
+        var oscQueryInfo = new Label("Hello, world!") { X = 0, Y = 0, };
+        oscQueryInfo.DrawContent += (e) =>
+        {
+            oscQueryInfo.Text =
+                $"OSCQuery Service running at TCP {oscQuery.TcpPort} and UDP {oscQuery.TcpPort}";
+        };
+        oscView.Add(oscQueryInfo);
+
+        var oscConnectionInfo = new Label("Hello, world!") { Y = Pos.Bottom(oscQueryInfo), };
+        oscConnectionInfo.DrawContent += (e) =>
+        {
+            if (oscClient.Client.Connected)
+            {
+                oscConnectionInfo.Text =
+                    $"VRChat OSC Client running at {oscClient.Client.RemoteEndPoint}";
+            }
+            else
+            {
+                oscConnectionInfo.Text = "VRChat OSC Client not connected!";
+            }
+        };
+        oscView.Add(oscConnectionInfo);
+
+        //we want to add a sub view that shows all the parameters
+        oscView.Add(
+            Parameters.GetWindow(
+                0,
+                Pos.Bottom(oscConnectionInfo),
+                Dim.Fill(),
+                Dim.Fill()
+            )
+        );
+
+        return oscView;
         }
     }
 

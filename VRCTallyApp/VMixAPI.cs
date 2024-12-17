@@ -1,4 +1,7 @@
+using System.Text;
+using System.Xml;
 using System.Xml.Serialization;
+using Terminal.Gui;
 
 namespace VMixAPI
 {
@@ -84,12 +87,39 @@ namespace VMixAPI
         [XmlElement(ElementName = "fullscreen")]
         public bool Fullscreen { get; set; }
 
+        [XmlIgnore]
+        public TimeSpan deserializationTime { get; set; }
+
+        //try to find the input with the name the user entered, otherwise print an error and skip everything else
+        //we need to search with wildcard * in mind
+        [XmlIgnore]
+        public Input tallyInput =>
+            Inputs?.Input.FirstOrDefault(i => i.Title.StartsWith(ProgramWindow.config.Vmix.Tally))
+            ?? new Input();
+
+        [XmlIgnore]
+        public int xmlCharacterCount;
+
         public static Vmix FromXML(string xml)
         {
+            //start a timer
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
+            StringBuilder sb = new StringBuilder(xml);
+            sb.Replace("True", "true");
+            sb.Replace("False", "false");
+
             var serializer = new XmlSerializer(typeof(Vmix));
-            using (var reader = new StringReader(xml))
+            using (var reader = new StringReader(sb.ToString()))
             {
-                return (Vmix)serializer.Deserialize(reader);
+                Vmix vm = (Vmix)serializer.Deserialize(reader);
+                vm.xmlCharacterCount = xml.Length;
+
+                //stop the timer
+                watch.Stop();
+                vm.deserializationTime = watch.Elapsed;
+                //store the time it took to deserialize
+                return vm;
             }
         }
     }
