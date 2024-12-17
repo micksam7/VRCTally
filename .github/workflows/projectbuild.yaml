@@ -15,8 +15,8 @@ jobs:
     - uses: actions/checkout@v3
 
     - run: |
-        echo "./VRCTallyUnityAvatar/Assets/VRCTally.meta" > ./VRCTallyUnityAvatar/metaList
-        find ./VRCTallyUnityAvatar/Assets/VRCTally/ -name \*.meta >> ./VRCTallyUnityAvatar/metaList
+        echo "Assets/VRCTally.meta" > ./VRCTallyUnityAvatar/metaList
+        find Assets/VRCTally/ -name \*.meta >> ./VRCTallyUnityAvatar/metaList
 
     - run: mkdir a
 
