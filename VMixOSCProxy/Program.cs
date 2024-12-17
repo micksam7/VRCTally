@@ -145,6 +145,7 @@ public static class Program
         {
             //request VMix XML
             string xml = await vmixclient.GetStringAsync("");
+            Console.WriteLine($"VMix XML Received, Length: {xml.Length}");
 
             //replace all "False" with "false" and "True" with "true"
             xml = xml.Replace("False", "false").Replace("True", "true");
