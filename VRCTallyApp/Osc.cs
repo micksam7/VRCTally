@@ -15,7 +15,7 @@ namespace ConfigXML
 
         private static ProgramConfig config;
         //constructor
-        public Osc(ref ProgramConfig conf)
+        public Osc(ProgramConfig conf)
         {
             config = conf;
 

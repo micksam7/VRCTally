@@ -14,7 +14,7 @@ public class Vmix
     //store the reference to the config
     private static ProgramConfig config;
 
-    public Vmix(ref ProgramConfig conf)
+    public Vmix(ProgramConfig conf)
     {
         config = conf;
 
@@ -65,13 +65,15 @@ public class Vmix
                 throw;
             }
 
-            if (data.tallyInput == null)
+            Input? tallyInput = data.FindInput(config.Vmix.Tally);
+
+            if (tallyInput == null)
             {
                 config.Osc.parameters.Error.Value = true;
             }
             else
             {
-                VMixState state = InterpretInputToState(data.tallyInput);
+                VMixState state = InterpretInputToState(tallyInput);
 
                 //send OSC updates
                 config.Osc.parameters.Preview.Value = state == VMixState.Preview;
@@ -191,7 +193,8 @@ public class Vmix
         trackedTally.DrawContent += (e) =>
         {
             trackedTally.Text = $"Configured Tally: {config.Vmix.Tally}";
-            trackedTally.Text += $"\nVMix Matched Input: {data.tallyInput.Title}";
+            Input tallyinput = data.FindInput(config.Vmix.Tally) ?? new();
+            trackedTally.Text += $"\nVMix Matched Input: {tallyinput.Title}";
         };
         vmixView.Add(trackedTally);
 
@@ -212,8 +215,8 @@ public class Vmix
         };
         currentTallyStatus.DrawContent += (e) =>
         {
-            currentTallyStatus.Text =
-                $"Current Tally Status: {InterpretInputToState(data.tallyInput)}";
+            Input tallyinput = data.FindInput(config.Vmix.Tally) ?? new();
+            currentTallyStatus.Text = $"Current Tally Status: {InterpretInputToState(tallyinput)}";
         };
         vmixView.Add(currentTallyStatus);
 

@@ -49,10 +49,10 @@ public class VmixAPIData
 
     //try to find the input with the name the user entered, otherwise print an error and skip everything else
     //we need to search with wildcard * in mind
-    [XmlIgnore]
-    public Input tallyInput =>
-        Inputs?.Input.FirstOrDefault(i => i.Title.StartsWith(ProgramWindow.config.Vmix.Tally))
-        ?? new Input();
+    public Input? FindInput(string title)
+    {
+        return Inputs?.Input.FirstOrDefault(i => i.Title.StartsWith(title));
+    }
 
     [XmlIgnore]
     public int xmlCharacterCount;
