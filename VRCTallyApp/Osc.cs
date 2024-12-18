@@ -66,6 +66,7 @@ namespace ConfigXML
 
         private async Task FindVRChatOSC()
         {
+            try {
             //oscClient = new("127.0.0.1", 9000);
 
             List<OSCQueryServiceProfile> services =
@@ -86,8 +87,13 @@ namespace ConfigXML
                     //setup OSC client
                     string IP = Hostinfo.oscIP;
                     int port = Hostinfo.oscPort;
-                    oscClient = new(IP, port);
+                    oscClient.Connect(IP, port);
                 }
+            }
+            }
+            catch
+            {
+
             }
         }
 
