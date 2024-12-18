@@ -93,6 +93,35 @@ public class Input
 
     [XmlText]
     public string Text { get; set; } = "???";
+
+    public enum VMixState
+    {
+        Program,
+        Preview,
+        Standby,
+        Unknown
+    }
+
+    public VMixState GetTallyState(VmixAPIData data)
+    {
+        if (data == null || Number == -1)
+        {
+            return VMixState.Unknown;
+        }
+
+        if (data.Preview == Number)
+        {
+            return VMixState.Preview;
+        }
+        else if (data.Active == Number)
+        {
+            return VMixState.Program;
+        }
+        else
+        {
+            return VMixState.Standby;
+        }
+    }
 }
 
 [XmlRoot(ElementName = "inputs")]

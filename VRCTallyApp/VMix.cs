@@ -41,15 +41,6 @@ public class Vmix
         mainTimer.Start();
     }
 
-    //create a enum to represent the state of the VMix
-    public enum VMixState
-    {
-        Live,
-        Preview,
-        Standby,
-        Unknown
-    }
-
     public async void WatchVMIX(object source, ElapsedEventArgs e)
     {
         try
@@ -73,46 +64,21 @@ public class Vmix
             }
             else
             {
-                VMixState state = InterpretInputToState(tallyInput);
-
                 //send OSC updates
-                config.Osc.parameters.Preview.Value = state == VMixState.Preview;
-                config.Osc.parameters.Program.Value = state == VMixState.Live;
-                config.Osc.parameters.Standby.Value = state == VMixState.Standby;
+                config.Osc.parameters.Preview.Value = tallyInput == data.PreviewInput;
+                config.Osc.parameters.Program.Value = tallyInput == data.ActiveInput;
+                config.Osc.parameters.Standby.Value =
+                    tallyInput != data.PreviewInput && tallyInput != data.ActiveInput;
                 //clear error state, but make sure if we cant find the input that we still error
-                config.Osc.parameters.Error.Value = state == VMixState.Unknown;
+                config.Osc.parameters.Error.Value = false;
             }
         }
         catch (Exception ex)
         {
             //set error state
             config.Osc.parameters.Error.Value = true;
+            throw;
         }
-    }
-
-    public VMixState InterpretInputToState(Input? input)
-    {
-        if (input == null || input?.Number == -1)
-        {
-            return VMixState.Unknown;
-        }
-
-        //determine if we are live, preview or standby
-        VMixState state;
-        if (data.ActiveInput == input) //this needs to be first to ensure that if you are both active and previewed, that you are considered live
-        {
-            state = VMixState.Live;
-        }
-        else if (data.PreviewInput == input)
-        {
-            state = VMixState.Preview;
-        }
-        else
-        {
-            state = VMixState.Standby;
-        }
-
-        return state;
     }
 
     public static VmixAPIData FromXML(string xml)
@@ -202,9 +168,9 @@ public class Vmix
         currentOutputs.DrawContent += (e) =>
         {
             currentOutputs.Text =
-                $"Current {VMixState.Preview} in VMix: {data.PreviewInput?.Title}";
+                $"Current {Input.VMixState.Preview} in VMix: {data.PreviewInput?.Title}";
             currentOutputs.Text +=
-                $"\nCurrent {VMixState.Preview} in VMix: {data.ActiveInput?.Title}";
+                $"\nCurrent {Input.VMixState.Program} in VMix: {data.ActiveInput?.Title}";
         };
         vmixView.Add(currentOutputs);
 
@@ -216,7 +182,7 @@ public class Vmix
         currentTallyStatus.DrawContent += (e) =>
         {
             Input tallyinput = data.FindInput(config.Vmix.Tally) ?? new();
-            currentTallyStatus.Text = $"Current Tally Status: {InterpretInputToState(tallyinput)}";
+            currentTallyStatus.Text = $"Current Tally Status: {tallyinput.GetTallyState(data)}";
         };
         vmixView.Add(currentTallyStatus);
 
