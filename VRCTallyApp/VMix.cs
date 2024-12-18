@@ -77,7 +77,7 @@ public class Vmix
         {
             //set error state
             config.Osc.parameters.Error.Value = true;
-            throw;
+            //throw;
         }
     }
 
