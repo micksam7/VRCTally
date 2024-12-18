@@ -12,11 +12,11 @@ public class Vmix
     private static HttpClient vmixclient = new();
 
     //store the reference to the config
-    private static ProgramConfig config;
+    private ProgramConfig config;
 
     public Vmix(ProgramConfig conf)
     {
-        config = conf;
+        config = conf ?? throw new ArgumentNullException(nameof(conf));
 
         //setup HTTP[s] request
         vmixclient = new()
@@ -41,7 +41,7 @@ public class Vmix
         mainTimer.Start();
     }
 
-    public async void WatchVMIX(object source, ElapsedEventArgs e)
+    public async void WatchVMIX(object? source, ElapsedEventArgs e)
     {
         try
         {
@@ -73,7 +73,7 @@ public class Vmix
                 config.Osc.parameters.Error.Value = false;
             }
         }
-        catch (Exception ex)
+        catch
         {
             //set error state
             config.Osc.parameters.Error.Value = true;
@@ -93,7 +93,8 @@ public class Vmix
         var serializer = new XmlSerializer(typeof(VmixAPIData));
         using (var reader = new StringReader(sb.ToString()))
         {
-            VmixAPIData data = (VmixAPIData)serializer.Deserialize(reader);
+            object? dataObject = serializer.Deserialize(reader);
+            VmixAPIData? data = dataObject as VmixAPIData;
             //stop the timer
             watch.Stop();
             if (data != null)

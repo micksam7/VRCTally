@@ -13,11 +13,11 @@ namespace ConfigXML
         public UdpClient oscClient = new();
         public OSCQueryService oscQuery;
 
-        private static ProgramConfig config;
+        private ProgramConfig config;
         //constructor
         public Osc(ProgramConfig conf)
         {
-            config = conf;
+            config = conf ?? throw new ArgumentNullException(nameof(conf));
 
             oscQuery = new OSCQueryServiceBuilder()
                 // First, modify class' properties.
@@ -41,13 +41,13 @@ namespace ConfigXML
             heartbeat.Start();
         }
 
-        private async void UpdateHeartbeat(object source, ElapsedEventArgs e)
+        private async void UpdateHeartbeat(object? source, ElapsedEventArgs e)
         {
             config.Osc.parameters.Heartbeat.Value = !config.Osc.parameters.Heartbeat.Value;
             await SendOSC(config.Osc.parameters.Heartbeat, BoolToValue(config.Osc.parameters.Heartbeat.Value));
         }
 
-        private async void UpdateOSC(object source, ElapsedEventArgs e)
+        private async void UpdateOSC(object? source, ElapsedEventArgs e)
         {
             //send all the parameters
             await SendOSC(config.Osc.parameters.Preview, BoolToValue(config.Osc.parameters.Preview.Value));

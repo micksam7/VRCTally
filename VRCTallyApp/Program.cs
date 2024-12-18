@@ -14,7 +14,7 @@ public class ProgramWindow : Window
     public ProgramWindow()
         : base("VRCTally - VMix OSC Proxy - Happyrobot33")
     {
-        ProgramConfig config = Task.Run(LoadConfig).Result;
+        ProgramConfig config = LoadConfig();
 
         Osc osc = new(config);
         //setup the vmix object
@@ -42,18 +42,17 @@ public class ProgramWindow : Window
         Add(vmixView);
     }
 
-    private static async Task<ProgramConfig> LoadConfig()
+    private static ProgramConfig LoadConfig()
     {
         Console.WriteLine("Loading config file");
-        //load in the config file'
-        string xml = await File.ReadAllTextAsync("config.xml");
 
-        ProgramConfig config;
+        ProgramConfig? config;
 
         XmlSerializer serializer = new XmlSerializer(typeof(ProgramConfig));
-        using (StringReader reader = new StringReader(xml))
+        using (FileStream reader = new FileStream("config.xml", FileMode.Open, FileAccess.Read))
         {
-            config = (ProgramConfig)serializer.Deserialize(reader);
+            object? configObject = serializer.Deserialize(reader);
+            config = configObject as ProgramConfig;
             if (config == null)
             {
                 throw new Exception("Failed to load config file");

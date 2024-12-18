@@ -128,5 +128,5 @@ public class Input
 public class Inputs
 {
     [XmlElement(ElementName = "input")]
-    public List<Input> Input { get; set; }
+    public List<Input> Input { get; set; } = new();
 }
