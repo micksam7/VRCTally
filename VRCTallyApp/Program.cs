@@ -137,11 +137,11 @@ public class ProgramWindow : Window
         mainTimer.Start();
 
         System.Timers.Timer appRefresh = new System.Timers.Timer();
-        mainTimer.Elapsed += new ElapsedEventHandler(
+        appRefresh.Elapsed += new ElapsedEventHandler(
             (source, e) => Application.MainLoop.Invoke(() => Application.Refresh())
         );
-        mainTimer.Interval = 100;
-        mainTimer.Start();
+        appRefresh.Interval = 100;
+        appRefresh.Start();
 
         //wait infinitely
         //await Task.Delay(-1);
