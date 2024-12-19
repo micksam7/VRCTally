@@ -45,39 +45,31 @@ public class Vmix
     {
         try
         {
-            try
-            {
-                data = FromXML(await vmixclient.GetStringAsync(""));
-            }
-            catch
-            {
-                //explicitely clear the vmix info
-                data = new();
-                throw;
-            }
-
-            Input? tallyInput = data.FindInput(config.Vmix.Tally);
-
-            if (tallyInput == null)
-            {
-                config.Osc.parameters.Error.Value = true;
-            }
-            else
-            {
-                //send OSC updates
-                config.Osc.parameters.Preview.Value = tallyInput == data.PreviewInput;
-                config.Osc.parameters.Program.Value = tallyInput == data.ActiveInput;
-                config.Osc.parameters.Standby.Value =
-                    tallyInput != data.PreviewInput && tallyInput != data.ActiveInput;
-                //clear error state, but make sure if we cant find the input that we still error
-                config.Osc.parameters.Error.Value = false;
-            }
+            data = FromXML(await vmixclient.GetStringAsync(""));
         }
-        catch
+        catch (HttpRequestException)
         {
-            //set error state
+            //explicitely clear the vmix info
+            data = new();
             config.Osc.parameters.Error.Value = true;
-            //throw;
+            return;
+        }
+
+        Input? tallyInput = data.FindInput(config.Vmix.Tally);
+
+        if (tallyInput == null)
+        {
+            config.Osc.parameters.Error.Value = true;
+        }
+        else
+        {
+            //send OSC updates
+            config.Osc.parameters.Preview.Value = tallyInput == data.PreviewInput;
+            config.Osc.parameters.Program.Value = tallyInput == data.ActiveInput;
+            config.Osc.parameters.Standby.Value =
+                tallyInput != data.PreviewInput && tallyInput != data.ActiveInput;
+            //clear error state, but make sure if we cant find the input that we still error
+            config.Osc.parameters.Error.Value = false;
         }
     }
 

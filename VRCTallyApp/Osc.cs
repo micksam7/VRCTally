@@ -58,9 +58,6 @@ namespace ConfigXML
 
         private async Task FindVRChatOSC()
         {
-            try {
-            //oscClient = new("127.0.0.1", 9000);
-
             List<OSCQueryServiceProfile> services =
             [
                 //add all to a list
@@ -75,17 +72,13 @@ namespace ConfigXML
                 if (tree.GetNodeWithPath("/chatbox/input") != null) //this is just a endpoint we know *has* to exist in VRChat
                 {
                     //get host info
-                    VRC.OSCQuery.HostInfo Hostinfo = await Extensions.GetHostInfo(service.address, service.port);
+                    HostInfo Hostinfo = await Extensions.GetHostInfo(service.address, service.port);
                     //setup OSC client
                     string IP = Hostinfo.oscIP;
                     int port = Hostinfo.oscPort;
                     oscClient.Connect(IP, port);
+                    return;
                 }
-            }
-            }
-            catch
-            {
-
             }
         }
 
