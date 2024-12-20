@@ -30,6 +30,8 @@ namespace ConfigXML
 
             [XmlElement(ElementName = "tally")]
             public required string Tally { get; set; }
+            [XmlElement(ElementName = "exactmatch")]
+            public required bool ExactMatch { get; set; }
 
             [XmlElement(ElementName = "updaterate")]
             public int UpdateRate { get; set; }

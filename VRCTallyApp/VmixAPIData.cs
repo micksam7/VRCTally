@@ -48,8 +48,12 @@ public class VmixAPIData
     public TimeSpan deserializationTime { get; set; }
 
     //try to find the input with the name the user entered, otherwise print an error and skip everything else
-    public Input? FindInput(string title)
+    public Input? FindInput(string title, bool exactMatch)
     {
+        if (exactMatch)
+        {
+            return Inputs?.Input.FirstOrDefault(i => i.Title == title);
+        }
         //this is nieve, this doesnt actually work as we care about the priority of the input itself
         /* return Inputs?.Input.FirstOrDefault(i => i.Title.StartsWith(title)); */
         Input? highestPriorityInput = null;

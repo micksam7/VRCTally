@@ -97,6 +97,7 @@ public class ProgramWindow : Window
                         config.Vmix.Tally = potentialNewTally;
                     }
                 }
+                config.Vmix.ExactMatch = true;
 
                 vmix.UpdateConfig(config);
                 SaveConfig(config);
@@ -129,6 +130,7 @@ public class ProgramWindow : Window
             wildcardTallyWizard.Finished += (e) =>
             {
                 config.Vmix.Tally = wildcardField.tf.Text.ToString() ?? "INVALIDINVALID";
+                config.Vmix.ExactMatch = false;
                 vmix.UpdateConfig(config);
                 SaveConfig(config);
 
@@ -181,6 +183,15 @@ public class ProgramWindow : Window
                 passwordField.tf.Secret = true;
             };
             firstVmixStep.Add(passwordField);
+
+            CheckBox exactMatchField = new("Look For Exact Input Names", config.Vmix.ExactMatch) { X = 0, Y = Pos.Bottom(passwordField), };
+            exactMatchField.Toggled += (e) =>
+            {
+                config.Vmix.ExactMatch = exactMatchField.Checked;
+            };
+            firstVmixStep.Add(exactMatchField);
+            firstVmixStep.HelpText =
+                $"Setup all of the connection info for communicating to VMix. The \"{exactMatchField.Text}\" option will make the app look for exact input names instead of generalizing and looking for inputs that contain the string.";
 
             vmixConnectionWizard.Finished += (e) =>
             {

@@ -84,7 +84,7 @@ public class Vmix
             return;
         }
 
-        Input? tallyInput = data.FindInput(config.Vmix.Tally);
+        Input? tallyInput = data.FindInput(config.Vmix.Tally, config.Vmix.ExactMatch);
 
         if (tallyInput == null)
         {
@@ -183,7 +183,7 @@ public class Vmix
         trackedTally.DrawContent += (e) =>
         {
             trackedTally.Text = $"Configured Tally: {config.Vmix.Tally}";
-            Input tallyinput = data.FindInput(config.Vmix.Tally) ?? new();
+            Input tallyinput = data.FindInput(config.Vmix.Tally, config.Vmix.ExactMatch) ?? new();
             trackedTally.Text += $"\nVMix Matched Input: {tallyinput.Title}";
         };
         vmixView.Add(trackedTally);
@@ -205,7 +205,7 @@ public class Vmix
         };
         currentTallyStatus.DrawContent += (e) =>
         {
-            Input tallyinput = data.FindInput(config.Vmix.Tally) ?? new();
+            Input tallyinput = data.FindInput(config.Vmix.Tally, config.Vmix.ExactMatch) ?? new();
             currentTallyStatus.Text = $"Current Tally Status: {tallyinput.GetTallyState(data)}";
         };
         vmixView.Add(currentTallyStatus);
