@@ -40,9 +40,9 @@ public class ProgramWindow : Window
 
         #region wizard
         //create a setup wizard to edit the config
-        var vmixWizard = new Wizard("VMIX");
-        var firstVmixStep = new Wizard.WizardStep("VMIX Setup");
-        vmixWizard.AddStep(firstVmixStep);
+        var vmixConnectionWizard = new Wizard("VMIX Connection");
+        var firstVmixStep = new Wizard.WizardStep("");
+        vmixConnectionWizard.AddStep(firstVmixStep);
 
         Option updateRateField =
             new("Update Rate: ", config.Vmix.UpdateRate.ToString()) { X = 0, Y = 0 };
@@ -65,7 +65,9 @@ public class ProgramWindow : Window
 
         //we need to make a step for selecting the tally
         //query the api once
-        var tallyWizardStep = new Wizard.WizardStep("Tally Selection");
+        var tallyWizard = new Wizard("Tally Selection");
+        var tallyWizardStep = new Wizard.WizardStep("");
+        tallyWizard.AddStep(tallyWizardStep);
         var notFoundLabel = new Label("No inputs found!") { X = 0, Y = 0, };
         notFoundLabel.Visible = false;
         var inputList = new ListView(new NStack.ustring[0])
@@ -79,39 +81,49 @@ public class ProgramWindow : Window
         inputList.AllowsMarking = true;
         tallyWizardStep.Add(inputList);
         tallyWizardStep.Add(notFoundLabel);
-        vmixWizard.AddStep(tallyWizardStep);
 
-        vmixWizard.StepChanging += (e) =>
+        tallyWizard.Added += async (e) =>
         {
-            if (e.NewStep == tallyWizardStep)
+            await vmix.PopulateSingleShot();
+
+            //populate the options
+            NStack.ustring[] inputs = vmix.GetInputs();
+            inputList.SetSource(inputs);
+
+            if (inputList.Source.Length == 0)
             {
-                //we need to load in everything possibly just changed in the previous step
-                config.Vmix.UpdateRate = int.Parse(updateRateField.tf.Text.ToString());
-                config.Vmix.Ip = ipField.tf.Text.ToString();
-                config.Vmix.Port = int.Parse(portField.tf.Text.ToString());
-                config.Vmix.Username = usernameField.tf.Text.ToString();
-                config.Vmix.Password = passwordField.tf.Text.ToString();
-                vmix.UpdateConfig(config);
-                vmix.PopulateSingleShot();
+                notFoundLabel.Visible = true;
+                notFoundLabel.Text =
+                    $"No inputs found! Check your VMix configuration. \'{config.Vmix.Tally}\' will be used instead.";
+            }
+            else
+            {
+                notFoundLabel.Visible = false;
 
-                //populate the options
-                inputList.SetSource(vmix.GetInputs());
-
-                if (inputList.Source.Length == 0)
+                //we should try and select the one we are already using
+                for (int i = 0; i < inputList.Source.Length; i++)
                 {
-                    notFoundLabel.Visible = true;
-                    notFoundLabel.Text =
-                        $"No inputs found! Check your VMix configuration. \'{config.Vmix.Tally}\' will be used instead.";
-                }
-                else
-                {
-                    notFoundLabel.Visible = false;
+                    if (inputs[i].ToString() == config.Vmix.Tally)
+                    {
+                        inputList.SelectedItem = i;
+                        inputList.MarkUnmarkRow();
+                        break;
+                    }
                 }
             }
         };
 
-        vmixWizard.Finished += (e) =>
+        tallyWizard.Finished += (e) =>
         {
+            //we need to load in everything possibly just changed in the previous step
+            config.Vmix.UpdateRate = int.Parse(updateRateField.tf.Text.ToString());
+            config.Vmix.Ip = ipField.tf.Text.ToString();
+            config.Vmix.Port = int.Parse(portField.tf.Text.ToString());
+            config.Vmix.Username = usernameField.tf.Text.ToString();
+            config.Vmix.Password = passwordField.tf.Text.ToString();
+            vmix.UpdateConfig(config);
+            SaveConfig(config);
+
             //we now want to read in what the radio label selection was
             int selected = inputList.SelectedItem;
             if (inputList.Source.Length > 0)
@@ -124,6 +136,20 @@ public class ProgramWindow : Window
                 }
             }
 
+            vmix.updateTimer.Start();
+
+            Remove(tallyWizard);
+        };
+
+        vmixConnectionWizard.Finished += (e) =>
+        {
+            //we need to load in everything possibly just changed in the previous step
+            config.Vmix.UpdateRate = int.Parse(updateRateField.tf.Text.ToString());
+            config.Vmix.Ip = ipField.tf.Text.ToString();
+            config.Vmix.Port = int.Parse(portField.tf.Text.ToString());
+            config.Vmix.Username = usernameField.tf.Text.ToString();
+            config.Vmix.Password = passwordField.tf.Text.ToString();
+            vmix.UpdateConfig(config);
             SaveConfig(config);
 
             oscView = osc.GetWindow(0, 0, Dim.Percent(50), Dim.Fill());
@@ -133,26 +159,35 @@ public class ProgramWindow : Window
             vmix.updateTimer.Start();
 
             //remove the wizard
-            Remove(vmixWizard);
+            Remove(vmixConnectionWizard);
         };
         #endregion
 
-        //setup a button to edit the config
-        var configButton = new Button("Edit VMix Config") { X = 0, Y = 0, };
-        configButton.Clicked += () =>
+        var RemoteTallySelectorButton = new Button("Select Existing Tally") { X = 0, Y = 0, };
+        RemoteTallySelectorButton.Clicked += () =>
         {
-            Add(vmixWizard);
+            Add(tallyWizard);
             //pause the vmix timer
             vmix.updateTimer.Stop();
         };
-        Add(configButton);
+        Add(RemoteTallySelectorButton);
 
-        oscView = osc.GetWindow(0, Pos.Bottom(configButton), Dim.Percent(50), Dim.Fill());
+        //setup a button to edit the config
+        var VmixConfigButton = new Button("Edit VMix Config") { X = Pos.Right(RemoteTallySelectorButton), Y = 0, };
+        VmixConfigButton.Clicked += () =>
+        {
+            Add(vmixConnectionWizard);
+            //pause the vmix timer
+            vmix.updateTimer.Stop();
+        };
+        Add(VmixConfigButton);
+
+        oscView = osc.GetWindow(0, Pos.Bottom(VmixConfigButton), Dim.Percent(50), Dim.Fill());
         Add(oscView);
 
         vmixView = vmix.GetWindow(
             Pos.Right(oscView),
-            Pos.Bottom(configButton),
+            Pos.Bottom(VmixConfigButton),
             Dim.Percent(50),
             Dim.Fill()
         );

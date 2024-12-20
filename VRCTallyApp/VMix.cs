@@ -20,12 +20,13 @@ public class Vmix
     {
         UpdateConfig(conf);
 
+        updateTimer.Elapsed += new ElapsedEventHandler(async (source, e) => await WatchVMIX(source, e));
         updateTimer.Start();
     }
 
-    public void PopulateSingleShot()
+    public async Task PopulateSingleShot()
     {
-        WatchVMIX(null, null);
+        await WatchVMIX(null, null);
     }
 
     public void UpdateConfig(ProgramConfig conf)
@@ -66,7 +67,7 @@ public class Vmix
         //return new NStack.ustring[0];
     }
 
-    public async void WatchVMIX(object? source, ElapsedEventArgs e)
+    public async Task WatchVMIX(object? source, ElapsedEventArgs e)
     {
         try
         {
