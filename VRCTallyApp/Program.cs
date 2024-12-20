@@ -138,7 +138,7 @@ public class ProgramWindow : Window
         #endregion
 
         //setup a button to edit the config
-        var configButton = new Button("Edit Config") { X = 0, Y = 0, };
+        var configButton = new Button("Edit VMix Config") { X = 0, Y = 0, };
         configButton.Clicked += () =>
         {
             Add(vmixWizard);
