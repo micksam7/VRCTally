@@ -99,7 +99,7 @@ public class ProgramWindow : Window
             NStack.ustring[] inputs = vmix.GetInputs();
             inputList.SetSource(inputs);
 
-            if (inputList.Source.Length == 0)
+            if (inputs.Length == 0)
             {
                 notFoundLabel.Visible = true;
                 notFoundLabel.Text =
@@ -110,7 +110,7 @@ public class ProgramWindow : Window
                 notFoundLabel.Visible = false;
 
                 //we should try and select the one we are already using
-                for (int i = 0; i < inputList.Source.Length; i++)
+                for (int i = 0; i < inputs.Length; i++)
                 {
                     if (inputs[i].ToString() == config.Vmix.Tally)
                     {
@@ -125,11 +125,11 @@ public class ProgramWindow : Window
         tallyWizard.Finished += (e) =>
         {
             //we need to load in everything possibly just changed in the previous step
-            config.Vmix.UpdateRate = int.Parse(updateRateField.tf.Text.ToString());
-            config.Vmix.Ip = ipField.tf.Text.ToString();
-            config.Vmix.Port = int.Parse(portField.tf.Text.ToString());
-            config.Vmix.Username = usernameField.tf.Text.ToString();
-            config.Vmix.Password = passwordField.tf.Text.ToString();
+            NStack.ustring[] inputs = vmix.GetInputs();
+            if (inputList.SelectedItem > 0)
+            {
+                config.Vmix.Tally = inputs[inputList.SelectedItem].ToString();
+            }
             vmix.UpdateConfig(config);
             SaveConfig(config);
 

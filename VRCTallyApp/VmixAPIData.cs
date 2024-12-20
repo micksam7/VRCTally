@@ -48,10 +48,41 @@ public class VmixAPIData
     public TimeSpan deserializationTime { get; set; }
 
     //try to find the input with the name the user entered, otherwise print an error and skip everything else
-    //we need to search with wildcard * in mind
     public Input? FindInput(string title)
     {
-        return Inputs?.Input.FirstOrDefault(i => i.Title.StartsWith(title));
+        //this is nieve, this doesnt actually work as we care about the priority of the input itself
+        /* return Inputs?.Input.FirstOrDefault(i => i.Title.StartsWith(title)); */
+        Input? highestPriorityInput = null;
+        foreach (Input input in Inputs?.Input ?? new List<Input>())
+        {
+            if (!input.Title.Contains(title))
+            {
+                continue;
+            }
+
+            //we want to update the input with the highest priority one
+            Input.VMixState state = input.GetTallyState(this);
+
+            if (state == Input.VMixState.Unknown)
+            {
+                continue;
+            }
+
+            if (highestPriorityInput == null)
+            {
+                highestPriorityInput = input;
+            }
+            else
+            {
+                //as long as the order in the enum doesnt change, this should work
+                if (state < highestPriorityInput.GetTallyState(this))
+                {
+                    highestPriorityInput = input;
+                }
+            }
+        }
+
+        return highestPriorityInput;
     }
 
     [XmlIgnore]
@@ -96,10 +127,10 @@ public class Input
 
     public enum VMixState
     {
-        Program,
-        Preview,
-        Standby,
-        Unknown
+        Program = 0,
+        Preview = 1,
+        Standby = 2,
+        Unknown = 3,
     }
 
     public VMixState GetTallyState(VmixAPIData data)
