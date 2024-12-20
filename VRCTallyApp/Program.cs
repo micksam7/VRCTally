@@ -86,16 +86,6 @@ public class ProgramWindow : Window
 
             tallyWizard.Finished += (e) =>
             {
-                //we need to load in everything possibly just changed in the previous step
-                NStack.ustring[] inputs = vmix.GetInputs();
-                if (inputList.SelectedItem > 0)
-                {
-                    config.Vmix.Tally =
-                        inputs[inputList.SelectedItem].ToString() ?? "INVALIDINVALID";
-                }
-                vmix.UpdateConfig(config);
-                SaveConfig(config);
-
                 //we now want to read in what the radio label selection was
                 int selected = inputList.SelectedItem;
                 if (inputList.Source.Length > 0)
@@ -107,6 +97,9 @@ public class ProgramWindow : Window
                         config.Vmix.Tally = potentialNewTally;
                     }
                 }
+
+                vmix.UpdateConfig(config);
+                SaveConfig(config);
 
                 vmix.updateTimer.Start();
 
