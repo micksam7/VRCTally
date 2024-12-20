@@ -15,10 +15,22 @@ public class Vmix
     private ProgramConfig config;
 
     public System.Timers.Timer updateTimer = new System.Timers.Timer();
+
     public Vmix(ProgramConfig conf)
     {
-        config = conf ?? throw new ArgumentNullException(nameof(conf));
+        UpdateConfig(conf);
 
+        updateTimer.Start();
+    }
+
+    public void PopulateSingleShot()
+    {
+        WatchVMIX(null, null);
+    }
+
+    public void UpdateConfig(ProgramConfig conf)
+    {
+        config = conf ?? throw new ArgumentNullException(nameof(conf));
         //setup HTTP[s] request
         vmixclient = new()
         {
@@ -35,10 +47,23 @@ public class Vmix
         );
 
         //setup the internal timer to load the xml
-        // Create a timer
-        updateTimer.Elapsed += new ElapsedEventHandler(WatchVMIX);
         updateTimer.Interval = conf.Vmix.UpdateRate;
-        updateTimer.Start();
+    }
+
+    public NStack.ustring[] GetInputs()
+    {
+        /* //generate a bunch of dummy inputs
+        NStack.ustring[] inputs = new NStack.ustring[40];
+        for (int i = 0; i < inputs.Length; i++)
+        {
+            inputs[i] = (NStack.ustring)$"Input {i}";
+        }
+        return inputs; */
+        return data.Inputs?.Input.Select(input => (NStack.ustring)input.Title).ToArray()
+            ?? new NStack.ustring[0];
+
+        //dummy optionms
+        //return new NStack.ustring[0];
     }
 
     public async void WatchVMIX(object? source, ElapsedEventArgs e)

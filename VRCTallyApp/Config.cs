@@ -96,6 +96,7 @@ namespace ConfigXML
                     public Address[] Addresses =>
                         Str.Select(s => new Address(avatarParamPrefix + s)).ToArray();
 
+                    [XmlIgnore]
                     public required T Value { get; set; }
 
                     public Label GetLabel(string name, Pos x, Pos y)

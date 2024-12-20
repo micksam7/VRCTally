@@ -35,41 +35,95 @@ public class ProgramWindow : Window
         Width = Dim.Fill();
         Height = Dim.Fill();
 
-        var oscView = osc.GetWindow(0, 0, Dim.Percent(50), Dim.Fill());
-        Add(oscView);
+        FrameView oscView;
+        FrameView vmixView;
 
-        var vmixView = vmix.GetWindow(Pos.Right(oscView), 0, Dim.Percent(50), Dim.Fill());
-        Add(vmixView);
-
+        #region wizard
         //create a setup wizard to edit the config
-        var vmixWizard = new Wizard("test");
-        TextField updateRateField = Option(config.Vmix.UpdateRate.ToString());
-        vmixWizard.Add(updateRateField.GetTopSuperView());
+        var vmixWizard = new Wizard("VMIX");
+        var firstVmixStep = new Wizard.WizardStep("VMIX Setup");
+        vmixWizard.AddStep(firstVmixStep);
 
-        TextField ipField = Option(config.Vmix.Ip);
-        ipField.GetTopSuperView().Y = Pos.Bottom(updateRateField.GetTopSuperView());
-        vmixWizard.Add(ipField.GetTopSuperView());
+        Option updateRateField =
+            new("Update Rate: ", config.Vmix.UpdateRate.ToString()) { X = 0, Y = 0 };
+        firstVmixStep.Add(updateRateField);
 
-        TextField portField = Option(config.Vmix.Port.ToString());
-        portField.GetTopSuperView().Y = Pos.Bottom(ipField.GetTopSuperView());
-        vmixWizard.Add(portField.GetTopSuperView());
+        Option ipField = new("IP: ", config.Vmix.Ip) { X = 0, Y = Pos.Bottom(updateRateField), };
+        firstVmixStep.Add(ipField);
 
-        TextField usernameField = Option(config.Vmix.Username);
-        usernameField.GetTopSuperView().Y = Pos.Bottom(portField.GetTopSuperView());
-        vmixWizard.Add(usernameField.GetTopSuperView());
+        Option portField =
+            new("Port: ", config.Vmix.Port.ToString()) { X = 0, Y = Pos.Bottom(ipField), };
+        firstVmixStep.Add(portField);
 
-        TextField passwordField = Option(config.Vmix.Password);
-        passwordField.GetTopSuperView().Y = Pos.Bottom(usernameField.GetTopSuperView());
-        vmixWizard.Add(passwordField.GetTopSuperView());
+        Option usernameField =
+            new("Username: ", config.Vmix.Username) { X = 0, Y = Pos.Bottom(portField), };
+        firstVmixStep.Add(usernameField);
 
+        Option passwordField =
+            new("Password: ", config.Vmix.Password) { X = 0, Y = Pos.Bottom(usernameField), };
+        firstVmixStep.Add(passwordField);
+
+        //we need to make a step for selecting the tally
+        //query the api once
+        var tallyWizardStep = new Wizard.WizardStep("Tally Selection");
+        var notFoundLabel = new Label("No inputs found!") { X = 0, Y = 0, };
+        notFoundLabel.Visible = false;
+        var inputList = new ListView(new NStack.ustring[0])
+        {
+            X = 0,
+            Y = 0,
+            Width = Dim.Fill(),
+            Height = Dim.Fill()
+        };
+        inputList.AllowsMultipleSelection = false;
+        inputList.AllowsMarking = true;
+        tallyWizardStep.Add(inputList);
+        tallyWizardStep.Add(notFoundLabel);
+        vmixWizard.AddStep(tallyWizardStep);
+
+        vmixWizard.StepChanging += (e) =>
+        {
+            if (e.NewStep == tallyWizardStep)
+            {
+                //we need to load in everything possibly just changed in the previous step
+                config.Vmix.UpdateRate = int.Parse(updateRateField.tf.Text.ToString());
+                config.Vmix.Ip = ipField.tf.Text.ToString();
+                config.Vmix.Port = int.Parse(portField.tf.Text.ToString());
+                config.Vmix.Username = usernameField.tf.Text.ToString();
+                config.Vmix.Password = passwordField.tf.Text.ToString();
+                vmix.UpdateConfig(config);
+                vmix.PopulateSingleShot();
+
+                //populate the options
+                inputList.SetSource(vmix.GetInputs());
+
+                if (inputList.Source.Length == 0)
+                {
+                    notFoundLabel.Visible = true;
+                    notFoundLabel.Text =
+                        $"No inputs found! Check your VMix configuration. \'{config.Vmix.Tally}\' will be used instead.";
+                }
+                else
+                {
+                    notFoundLabel.Visible = false;
+                }
+            }
+        };
 
         vmixWizard.Finished += (e) =>
         {
-            config.Vmix.UpdateRate = int.Parse(updateRateField.Text.ToString());
-            config.Vmix.Ip = ipField.Text.ToString();
-            config.Vmix.Port = int.Parse(portField.Text.ToString());
-            config.Vmix.Username = usernameField.Text.ToString();
-            config.Vmix.Password = passwordField.Text.ToString();
+            //we now want to read in what the radio label selection was
+            int selected = inputList.SelectedItem;
+            if (inputList.Source.Length > 0)
+            {
+                string potentialNewTally = vmix.GetInputs()[selected]?.ToString() ?? "";
+                //null check
+                if (!string.IsNullOrWhiteSpace(potentialNewTally))
+                {
+                    config.Vmix.Tally = potentialNewTally;
+                }
+            }
+
             SaveConfig(config);
 
             oscView = osc.GetWindow(0, 0, Dim.Percent(50), Dim.Fill());
@@ -81,45 +135,28 @@ public class ProgramWindow : Window
             //remove the wizard
             Remove(vmixWizard);
         };
+        #endregion
 
+        //setup a button to edit the config
+        var configButton = new Button("Edit Config") { X = 0, Y = 0, };
+        configButton.Clicked += () =>
+        {
+            Add(vmixWizard);
+            //pause the vmix timer
+            vmix.updateTimer.Stop();
+        };
+        Add(configButton);
 
-        //watch for letter e input
-        KeyDown += (e) =>
-        {
-            if (e.KeyEvent.Key == Key.e)
-            {
-                Add(vmixWizard);
-                //pause the vmix timer
-                vmix.updateTimer.Stop();
-            }
-        };
-    }
+        oscView = osc.GetWindow(0, Pos.Bottom(configButton), Dim.Percent(50), Dim.Fill());
+        Add(oscView);
 
-    private static TextField Option(string str)
-    {
-        View option = new View()
-        {
-            X = 0,
-            Y = 0,
-            Width = Dim.Fill(),
-            Height = 1,
-        };
-        var lbl = new Label("Update Rate: ")
-        {
-            X = 0,
-            Y = 0,
-        };
-        option.Add(lbl);
-        var field = new TextField("")
-        {
-            X = Pos.Right(lbl),
-            Y = 0,
-            Width = Dim.Fill(),
-            Height = 1,
-            Text = str,
-        };
-        option.Add(field);
-        return field;
+        vmixView = vmix.GetWindow(
+            Pos.Right(oscView),
+            Pos.Bottom(configButton),
+            Dim.Percent(50),
+            Dim.Fill()
+        );
+        Add(vmixView);
     }
 
     private static void SaveConfig(ProgramConfig config)
