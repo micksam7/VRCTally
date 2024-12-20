@@ -20,13 +20,6 @@ public class ProgramWindow : Window
         //setup the vmix object
         Vmix vmix = new(config);
 
-        System.Timers.Timer appRefresh = new System.Timers.Timer();
-        appRefresh.Elapsed += new ElapsedEventHandler(
-            (source, e) => Application.MainLoop.Invoke(() => Application.Refresh())
-        );
-        appRefresh.Interval = 100;
-        appRefresh.Start();
-
         //wait infinitely
         //await Task.Delay(-1);
 
@@ -231,6 +224,11 @@ public class ProgramWindow : Window
             Dim.Fill()
         );
         Add(vmixView);
+    }
+
+    public static void InvokeApplicationRefresh()
+    {
+        Application.MainLoop.Invoke(() => Application.Refresh());
     }
 
     private static void SaveConfig(ProgramConfig config)

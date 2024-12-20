@@ -20,7 +20,9 @@ public class Vmix
     {
         UpdateConfig(conf);
 
-        updateTimer.Elapsed += new ElapsedEventHandler(async (source, e) => await WatchVMIX(source, e));
+        updateTimer.Elapsed += new ElapsedEventHandler(
+            async (source, e) => await WatchVMIX(source, e)
+        );
         updateTimer.Start();
     }
 
@@ -97,6 +99,8 @@ public class Vmix
             //clear error state, but make sure if we cant find the input that we still error
             config.Osc.parameters.Error.Value = false;
         }
+
+        ProgramWindow.InvokeApplicationRefresh();
     }
 
     public static VmixAPIData FromXML(string xml)

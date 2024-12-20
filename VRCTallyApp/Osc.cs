@@ -45,6 +45,8 @@ namespace ConfigXML
         {
             config.Osc.parameters.Heartbeat.Value = !config.Osc.parameters.Heartbeat.Value;
             await SendOSC(config.Osc.parameters.Heartbeat, BoolToValue(config.Osc.parameters.Heartbeat.Value));
+            
+            ProgramWindow.InvokeApplicationRefresh();
         }
 
         private async void UpdateOSC(object? source, ElapsedEventArgs e)
@@ -54,6 +56,8 @@ namespace ConfigXML
             await SendOSC(config.Osc.parameters.Program, BoolToValue(config.Osc.parameters.Program.Value));
             await SendOSC(config.Osc.parameters.Standby, BoolToValue(config.Osc.parameters.Standby.Value));
             await SendOSC(config.Osc.parameters.Error, BoolToValue(config.Osc.parameters.Error.Value));
+
+            ProgramWindow.InvokeApplicationRefresh();
         }
 
         private async Task FindVRChatOSC()
