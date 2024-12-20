@@ -11,7 +11,7 @@ public class Option : View
         Width = Dim.Fill();
         Height = 1;
 
-        var lbl = new Label(title) { X = 0, Y = 0 };
+        lbl = new Label(title) { X = 0, Y = 0 };
         Add(lbl);
         tf = new TextField("")
         {

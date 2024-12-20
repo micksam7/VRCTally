@@ -18,6 +18,7 @@ public class Vmix
 
     public Vmix(ProgramConfig conf)
     {
+        config = conf;
         UpdateConfig(conf);
 
         updateTimer.Elapsed += new ElapsedEventHandler(
@@ -33,7 +34,7 @@ public class Vmix
 
     public void UpdateConfig(ProgramConfig conf)
     {
-        config = conf ?? throw new ArgumentNullException(nameof(conf));
+        config = conf;
         //setup HTTP[s] request
         vmixclient = new()
         {
@@ -69,7 +70,7 @@ public class Vmix
         //return new NStack.ustring[0];
     }
 
-    public async Task WatchVMIX(object? source, ElapsedEventArgs e)
+    public async Task WatchVMIX(object? source, ElapsedEventArgs? e)
     {
         try
         {

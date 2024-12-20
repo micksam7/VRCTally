@@ -90,7 +90,8 @@ public class ProgramWindow : Window
                 NStack.ustring[] inputs = vmix.GetInputs();
                 if (inputList.SelectedItem > 0)
                 {
-                    config.Vmix.Tally = inputs[inputList.SelectedItem].ToString();
+                    config.Vmix.Tally =
+                        inputs[inputList.SelectedItem].ToString() ?? "INVALIDINVALID";
                 }
                 vmix.UpdateConfig(config);
                 SaveConfig(config);
@@ -134,7 +135,7 @@ public class ProgramWindow : Window
             firstStep.Add(wildcardField);
             wildcardTallyWizard.Finished += (e) =>
             {
-                config.Vmix.Tally = wildcardField.tf.Text.ToString();
+                config.Vmix.Tally = wildcardField.tf.Text.ToString() ?? "INVALIDINVALID";
                 vmix.UpdateConfig(config);
                 SaveConfig(config);
 
@@ -191,11 +192,11 @@ public class ProgramWindow : Window
             vmixConnectionWizard.Finished += (e) =>
             {
                 //we need to load in everything possibly just changed in the previous step
-                config.Vmix.UpdateRate = int.Parse(updateRateField.tf.Text.ToString());
-                config.Vmix.Ip = ipField.tf.Text.ToString();
-                config.Vmix.Port = int.Parse(portField.tf.Text.ToString());
-                config.Vmix.Username = usernameField.tf.Text.ToString();
-                config.Vmix.Password = passwordField.tf.Text.ToString();
+                config.Vmix.UpdateRate = int.Parse(updateRateField.tf.Text.ToString() ?? "1000");
+                config.Vmix.Ip = ipField.tf.Text.ToString() ?? "localhost";
+                config.Vmix.Port = int.Parse(portField.tf.Text.ToString() ?? "8088");
+                config.Vmix.Username = usernameField.tf.Text.ToString() ?? "admin";
+                config.Vmix.Password = passwordField.tf.Text.ToString() ?? "password";
                 vmix.UpdateConfig(config);
                 SaveConfig(config);
 
