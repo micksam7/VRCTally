@@ -14,6 +14,7 @@ public class Vmix
     //store the reference to the config
     private ProgramConfig config;
 
+    public System.Timers.Timer updateTimer = new System.Timers.Timer();
     public Vmix(ProgramConfig conf)
     {
         config = conf ?? throw new ArgumentNullException(nameof(conf));
@@ -35,10 +36,9 @@ public class Vmix
 
         //setup the internal timer to load the xml
         // Create a timer
-        System.Timers.Timer mainTimer = new System.Timers.Timer();
-        mainTimer.Elapsed += new ElapsedEventHandler(WatchVMIX);
-        mainTimer.Interval = conf.Vmix.UpdateRate;
-        mainTimer.Start();
+        updateTimer.Elapsed += new ElapsedEventHandler(WatchVMIX);
+        updateTimer.Interval = conf.Vmix.UpdateRate;
+        updateTimer.Start();
     }
 
     public async void WatchVMIX(object? source, ElapsedEventArgs e)
@@ -105,9 +105,9 @@ public class Vmix
         }
     }
 
-    public Window GetWindow(Pos x, Pos y, Dim width, Dim height)
+    public FrameView GetWindow(Pos x, Pos y, Dim width, Dim height)
     {
-        Window vmixView =
+        FrameView vmixView =
             new("VMix")
             {
                 X = x,

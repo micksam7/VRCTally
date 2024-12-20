@@ -62,9 +62,9 @@ namespace ConfigXML
                 [XmlElement(ElementName = "error")]
                 public required Parameter<bool> Error { get; set; }
 
-                public View GetWindow(Pos x, Pos y, Dim width, Dim height)
+                public FrameView GetWindow(Pos x, Pos y, Dim width, Dim height)
                 {
-                    Window paramView =
+                    FrameView paramView =
                         new("Parameters")
                         {
                             X = x,

@@ -107,10 +107,10 @@ namespace ConfigXML
             return value ? OscTrue.True : OscFalse.False;
         }
 
-        public Window GetWindow(Pos x, Pos y, Dim width, Dim height)
+        public FrameView GetWindow(Pos x, Pos y, Dim width, Dim height)
         {
             //setup two subviews, one for OSC and one for VMix
-        Window oscView =
+        FrameView oscView =
             new("OSC")
             {
                 X = x,
