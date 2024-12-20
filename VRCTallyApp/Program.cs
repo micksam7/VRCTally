@@ -61,6 +61,15 @@ public class ProgramWindow : Window
 
         Option passwordField =
             new("Password: ", config.Vmix.Password) { X = 0, Y = Pos.Bottom(usernameField), };
+        passwordField.tf.Secret = true;
+        passwordField.tf.Enter += (e) =>
+        {
+            passwordField.tf.Secret = false;
+        };
+        passwordField.tf.Leave += (e) =>
+        {
+            passwordField.tf.Secret = true;
+        };
         firstVmixStep.Add(passwordField);
 
         //we need to make a step for selecting the tally
