@@ -152,12 +152,12 @@ public class Vmix
         {
             if (data.valid)
             {
-                vmixConnectionInfo.Text = $"Connected to VMix at {vmixclient.BaseAddress}";
+                vmixConnectionInfo.Text = "Connected to VMix";
             }
             else
             {
                 vmixConnectionInfo.Text =
-                    $"Attempting to connect to VMix at {vmixclient.BaseAddress}";
+                    "Attempting to connect to VMix";
             }
         };
         vmixView.Add(vmixConnectionInfo);
