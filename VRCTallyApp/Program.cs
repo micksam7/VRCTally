@@ -11,10 +11,12 @@ using YamlDotNet.Serialization.NamingConventions;
 Application.Run<ProgramWindow>();
 await Task.Delay(-1);
 
+
 public class ProgramWindow : Window
 {
+    const string VERSION = "v1.0.0";
     public ProgramWindow()
-        : base("VRCTally - VMix OSC Proxy - Happyrobot33")
+        : base($"VRCTally - VMix OSC Proxy - {VERSION} - Happyrobot33")
     {
         ProgramConfig config = LoadConfig();
 
