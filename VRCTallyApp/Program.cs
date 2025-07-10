@@ -194,6 +194,13 @@ public class ProgramWindow : Window
                 config.Vmix.ExactMatch = exactMatchField.Checked;
             };
             firstVmixStep.Add(exactMatchField);
+            CheckBox hideAddressField =
+                new("Hide Address", config.Vmix.HideAddress) { X = 0, Y = Pos.Bottom(exactMatchField), };
+            hideAddressField.Toggled += (e) =>
+            {
+                config.Vmix.HideAddress = hideAddressField.Checked;
+            };
+            firstVmixStep.Add(hideAddressField);
             firstVmixStep.HelpText =
                 $"Setup all of the connection info for communicating to VMix. The \"{exactMatchField.Text}\" option will make the app look for exact input names instead of generalizing and looking for inputs that contain the string.";
 
