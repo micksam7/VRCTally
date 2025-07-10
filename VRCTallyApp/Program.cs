@@ -250,7 +250,7 @@ public class ProgramWindow : Window
         {
             using (StreamWriter sw = new StreamWriter(writer, Encoding.UTF8))
             {
-                sw.Write(yaml);
+                sw.Write("# This is a YML file format\n" + yaml);
             }
         }
     }
