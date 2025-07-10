@@ -150,15 +150,22 @@ public class Vmix
         var vmixConnectionInfo = new Label("Hello, world!") { X = 0, Y = 0, };
         vmixConnectionInfo.DrawContent += (e) =>
         {
+            string cleanAddress = vmixclient.BaseAddress.ToString();
+            if (config.Vmix.HideAddress)
+            {
+                //replace all characters with X
+                cleanAddress = new string('X', cleanAddress.Length);
+            }
+
             if (data.valid)
-            {
-                vmixConnectionInfo.Text = $"Connected to VMix at {vmixclient.BaseAddress}";
-            }
-            else
-            {
-                vmixConnectionInfo.Text =
-                    $"Attempting to connect to VMix at {vmixclient.BaseAddress}";
-            }
+                {
+                    vmixConnectionInfo.Text = $"Connected to VMix at {cleanAddress}";
+                }
+                else
+                {
+                    vmixConnectionInfo.Text =
+                        $"Attempting to connect to VMix at {cleanAddress}";
+                }
         };
         vmixView.Add(vmixConnectionInfo);
 
