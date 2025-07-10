@@ -1,0 +1,30 @@
+﻿#This is a YML configuration file
+vmix:
+  ip: localhost
+  port: 8088
+  hideAddress: false
+  username: admin
+  password: admin
+  tally: Cam 4
+  exactMatch: false
+  updateRate: 1000
+osc:
+  parameters:
+    preview:
+      parameterStrings:
+      - VRCTally_Preview
+      - VRCLLime_Preview_Active
+    program:
+      parameterStrings:
+      - VRCTally_Program
+      - VRCLLime_Program_Active
+    standby:
+      parameterStrings:
+      - VRCTally_Standby
+    heartbeat:
+      parameterStrings:
+      - VRCTally_Heartbeat
+    error:
+      parameterStrings:
+      - VRCTally_Error
+  updateRate: 500

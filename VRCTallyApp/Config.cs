@@ -1,67 +1,48 @@
 using System.Xml.Serialization;
 using CoreOSC;
 using Terminal.Gui;
+using YamlDotNet.Serialization;
 
 namespace ConfigXML
 {
-    [XmlRoot(ElementName = "config")]
     public class ProgramConfig
     {
-        [XmlElement(ElementName = "vmix")]
         public required VmixConfig Vmix { get; set; }
-
-        [XmlElement(ElementName = "osc")]
         public required OscConfig Osc { get; set; }
 
-        [XmlRoot(ElementName = "vmix")]
         public class VmixConfig
         {
-            [XmlElement(ElementName = "ip")]
             public required string Ip { get; set; }
 
-            [XmlElement(ElementName = "port")]
             public int Port { get; set; }
+            public bool HideAddress { get; set; }
 
-            [XmlElement(ElementName = "username")]
             public required string Username { get; set; }
 
-            [XmlElement(ElementName = "password")]
             public required string Password { get; set; }
 
-            [XmlElement(ElementName = "tally")]
             public required string Tally { get; set; }
-            [XmlElement(ElementName = "exactmatch")]
             public required bool ExactMatch { get; set; }
 
-            [XmlElement(ElementName = "updaterate")]
             public int UpdateRate { get; set; }
         }
 
-        [XmlRoot(ElementName = "osc")]
         public class OscConfig
         {
-            [XmlElement(ElementName = "parameters")]
             public required Parameters parameters { get; set; }
 
-            [XmlElement(ElementName = "updaterate")]
             public required int UpdateRate { get; set; }
 
-            [XmlRoot(ElementName = "parameters")]
             public class Parameters
             {
-                [XmlElement(ElementName = "preview")]
                 public required Parameter<bool> Preview { get; set; }
 
-                [XmlElement(ElementName = "program")]
                 public required Parameter<bool> Program { get; set; }
 
-                [XmlElement(ElementName = "standby")]
                 public required Parameter<bool> Standby { get; set; }
 
-                [XmlElement(ElementName = "heartbeat")]
                 public required Parameter<bool> Heartbeat { get; set; }
 
-                [XmlElement(ElementName = "error")]
                 public required Parameter<bool> Error { get; set; }
 
                 public FrameView GetWindow(Pos x, Pos y, Dim width, Dim height)
@@ -93,12 +74,13 @@ namespace ConfigXML
                 {
                     public const string avatarParamPrefix = "/avatar/parameters/";
 
-                    [XmlElement(ElementName = "parameter")]
-                    public required string[] Str { get; set; }
-                    public Address[] Addresses =>
-                        Str.Select(s => new Address(avatarParamPrefix + s)).ToArray();
+                    public required string[] ParameterStrings { get; set; }
 
-                    [XmlIgnore]
+                    [YamlIgnore]
+                    public Address[] Addresses =>
+                        ParameterStrings.Select(s => new Address(avatarParamPrefix + s)).ToArray();
+
+                    [YamlIgnore]
                     public required T Value { get; set; }
 
                     public Label GetLabel(string name, Pos x, Pos y)
@@ -107,7 +89,7 @@ namespace ConfigXML
                         lbl.DrawContent += (e) =>
                         {
                             lbl.Text = $"{name}: {Value}";
-                            foreach (var addr in Str)
+                            foreach (var addr in ParameterStrings)
                             {
                                 lbl.Text += $"\n    {addr}";
                             }

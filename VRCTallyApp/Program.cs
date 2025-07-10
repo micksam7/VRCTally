@@ -4,6 +4,8 @@ using System.Timers;
 using System.Xml.Serialization;
 using ConfigXML;
 using Terminal.Gui;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 //start main
 Application.Run<ProgramWindow>();
@@ -240,10 +242,16 @@ public class ProgramWindow : Window
     {
         Console.WriteLine("Saving config file");
 
-        XmlSerializer serializer = new XmlSerializer(typeof(ProgramConfig));
-        using (FileStream writer = new FileStream("config.xml", FileMode.Create, FileAccess.Write))
+        var serializer = new SerializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .Build();
+        var yaml = serializer.Serialize(config);
+        using (FileStream writer = new FileStream("config.tally", FileMode.Create, FileAccess.Write))
         {
-            serializer.Serialize(writer, config);
+            using (StreamWriter sw = new StreamWriter(writer, Encoding.UTF8))
+            {
+                sw.Write(yaml);
+            }
         }
     }
 
@@ -253,14 +261,20 @@ public class ProgramWindow : Window
 
         ProgramConfig? config;
 
-        XmlSerializer serializer = new XmlSerializer(typeof(ProgramConfig));
-        using (FileStream reader = new FileStream("config.xml", FileMode.Open, FileAccess.Read))
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .Build();
+
+        using (FileStream reader = new FileStream("config.tally", FileMode.Open, FileAccess.Read))
         {
-            object? configObject = serializer.Deserialize(reader);
-            config = configObject as ProgramConfig;
-            if (config == null)
+            using (StreamReader sr = new StreamReader(reader, Encoding.UTF8))
             {
-                throw new Exception("Failed to load config file");
+                // Deserialize the YAML file into the ProgramConfig object
+                config = deserializer.Deserialize<ProgramConfig>(sr);
+                if (config == null)
+                {
+                    throw new Exception("Failed to load config file");
+                }
             }
         }
 
