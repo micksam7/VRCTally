@@ -29,9 +29,8 @@ namespace ConfigXML
 
         public class OscConfig
         {
-            public required Parameters parameters { get; set; }
-
             public required int UpdateRate { get; set; }
+            public required Parameters parameters { get; set; }
 
             public class Parameters
             {

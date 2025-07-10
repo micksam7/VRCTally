@@ -9,6 +9,7 @@ vmix:
   exactMatch: false
   updateRate: 1000
 osc:
+  updateRate: 500
   parameters:
     preview:
       parameterStrings:
@@ -27,4 +28,3 @@ osc:
     error:
       parameterStrings:
       - VRCTally_Error
-  updateRate: 500
