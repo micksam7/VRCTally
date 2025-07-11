@@ -93,10 +93,10 @@ public class Vmix
         else
         {
             //send OSC updates
-            config.Osc.parameters.Preview.Value = tallyInput == data.PreviewInput;
-            config.Osc.parameters.Program.Value = tallyInput == data.ActiveInput;
-            config.Osc.parameters.Standby.Value =
-                tallyInput != data.PreviewInput && tallyInput != data.ActiveInput;
+            var state = tallyInput.GetTallyState(data);
+            config.Osc.parameters.Preview.Value = state == Input.VMixState.Preview;
+            config.Osc.parameters.Program.Value = state == Input.VMixState.Program;
+            config.Osc.parameters.Standby.Value = state == Input.VMixState.Standby;
             //clear error state, but make sure if we cant find the input that we still error
             config.Osc.parameters.Error.Value = false;
         }
@@ -198,10 +198,16 @@ public class Vmix
         var currentOutputs = new Label("Hello, world!") { X = 0, Y = Pos.Bottom(trackedTally), };
         currentOutputs.DrawContent += (e) =>
         {
+            //gather lists of the preview and active inputs
+            var previews = data.GetAllPreviewIDs();
+            var actives = data.GetAllActiveIDs();
+            //convert them to a string
+            string previewList = string.Join(", ", previews.Select(i => i.Title));
+            string activeList = string.Join(", ", actives.Select(i => i.Title));
             currentOutputs.Text =
-                $"Current {Input.VMixState.Preview} in VMix: {data.PreviewInput?.Title}";
+                $"Current {Input.VMixState.Preview}(s) in VMix: {previewList}";
             currentOutputs.Text +=
-                $"\nCurrent {Input.VMixState.Program} in VMix: {data.ActiveInput?.Title}";
+                $"\nCurrent {Input.VMixState.Program}(s) in VMix: {activeList}";
         };
         vmixView.Add(currentOutputs);
 

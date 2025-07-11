@@ -15,13 +15,9 @@ public class VmixAPIData
 
     [XmlElement(ElementName = "preview")]
     public int Preview { get; set; }
-    public Input PreviewInput =>
-        Inputs?.Input.FirstOrDefault(i => i.Number == Preview) ?? new Input();
 
     [XmlElement(ElementName = "active")]
     public int Active { get; set; }
-    public Input ActiveInput =>
-        Inputs?.Input.FirstOrDefault(i => i.Number == Active) ?? new Input();
 
     [XmlElement(ElementName = "fadeToBlack")]
     public bool FadeToBlack { get; set; }
@@ -43,6 +39,9 @@ public class VmixAPIData
 
     [XmlElement(ElementName = "fullscreen")]
     public bool Fullscreen { get; set; }
+
+    [XmlElement(ElementName = "mix")]
+    public List<Mix> Mixes { get; set; } = new();
 
     [XmlIgnore]
     public TimeSpan deserializationTime { get; set; }
@@ -89,11 +88,78 @@ public class VmixAPIData
         return highestPriorityInput;
     }
 
+    public Input? FindInput(int number)
+    {
+        if (Inputs == null)
+        {
+            return null;
+        }
+
+        //find the input with the number
+        return Inputs.Input.FirstOrDefault(i => i.Number == number);
+    }
+
     [XmlIgnore]
     public int xmlCharacterCount;
 
     [XmlIgnore]
     public bool valid = false;
+
+    public List<Input> GetAllActiveIDs()
+    {
+        List<Input> activeInputs = new();
+        if (Inputs == null)
+        {
+            return activeInputs;
+        }
+
+        //add the easy one
+        var basic = FindInput(Active);
+        if (basic != null)
+        {
+            activeInputs.Add(basic);
+        }
+
+        //add in all the mixes
+        foreach (Mix mix in Mixes)
+        {
+            var possibleActive = FindInput(mix.Active);
+            if (possibleActive != null)
+            {
+                activeInputs.Add(possibleActive);
+            }
+        }
+
+        return activeInputs;
+    }
+
+    public List<Input> GetAllPreviewIDs()
+    {
+        List<Input> previewInputs = new();
+        if (Inputs == null)
+        {
+            return previewInputs;
+        }
+
+        //add the easy one
+        var basic = FindInput(Preview);
+        if (basic != null)
+        {
+            previewInputs.Add(basic);
+        }
+
+        //add in all the mixes
+        foreach (Mix mix in Mixes)
+        {
+            var possiblePreview = FindInput(mix.Preview);
+            if (possiblePreview != null)
+            {
+                previewInputs.Add(possiblePreview);
+            }
+        }
+
+        return previewInputs;
+    }
 }
 
 [XmlRoot(ElementName = "input")]
@@ -144,13 +210,16 @@ public class Input
             return VMixState.Unknown;
         }
 
-        if (data.Preview == Number)
-        {
-            return VMixState.Preview;
-        }
-        else if (data.Active == Number)
+        var previews = data.GetAllPreviewIDs();
+        var actives = data.GetAllActiveIDs();
+
+        if (actives.Contains(this))
         {
             return VMixState.Program;
+        }
+        else if (previews.Contains(this))
+        {
+            return VMixState.Preview;
         }
         else
         {
@@ -164,4 +233,14 @@ public class Inputs
 {
     [XmlElement(ElementName = "input")]
     public List<Input> Input { get; set; } = new();
+}
+
+[XmlRoot(ElementName = "mix")]
+public class Mix
+{
+    [XmlElement(ElementName = "preview")]
+    public int Preview { get; set; }
+
+    [XmlElement(ElementName = "active")]
+    public int Active { get; set; }
 }
