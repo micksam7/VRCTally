@@ -67,28 +67,28 @@ namespace ConfigXML
             oscClient.Connect(IP, port);
             return;
             
-            List<OSCQueryServiceProfile> services =
-            [
-                //add all to a list
-                .. oscQuery.GetOSCQueryServices(),
-            ];
+            // List<OSCQueryServiceProfile> services =
+            // [
+            //     //add all to a list
+            //     .. oscQuery.GetOSCQueryServices(),
+            // ];
 
-            //we now need to find the specific connection for VRChat
-            foreach (var service in services)
-            {
-                //check if it has the endpoint we need
-                var tree = await Extensions.GetOSCTree(service.address, service.port);
-                if (tree.GetNodeWithPath("/chatbox/input") != null) //this is just a endpoint we know *has* to exist in VRChat
-                {
-                    //get host info
-                    HostInfo Hostinfo = await Extensions.GetHostInfo(service.address, service.port);
-                    //setup OSC client
-                    string IP = Hostinfo.oscIP;
-                    int port = Hostinfo.oscPort;
-                    oscClient.Connect(IP, port);
-                    return;
-                }
-            }
+            // //we now need to find the specific connection for VRChat
+            // foreach (var service in services)
+            // {
+            //     //check if it has the endpoint we need
+            //     var tree = await Extensions.GetOSCTree(service.address, service.port);
+            //     if (tree.GetNodeWithPath("/chatbox/input") != null) //this is just a endpoint we know *has* to exist in VRChat
+            //     {
+            //         //get host info
+            //         HostInfo Hostinfo = await Extensions.GetHostInfo(service.address, service.port);
+            //         //setup OSC client
+            //         string IP = Hostinfo.oscIP;
+            //         int port = Hostinfo.oscPort;
+            //         oscClient.Connect(IP, port);
+            //         return;
+            //     }
+            // }
         }
 
         private async Task SendOSC<T>(ProgramConfig.OscConfig.Parameters.Parameter<T> parameter, params object[] value)
